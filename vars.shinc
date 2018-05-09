@@ -1,0 +1,212 @@
+#--------------------------------------------------------------------
+# START GLOBAL VARIABLES
+#
+
+#------------------------
+# Runtimes for various phases
+# WARNING: if you change these you need to re-run 'writeXML.sh'
+unittime="m"                 # unit for time values (s=sec; m=min; h=hr)
+starttime="10"
+failuretime="5"
+#failuretime="3"
+recoverytime="60"
+#recoverytime="10"
+phasetime=$(( starttime + failuretime + recoverytime ))
+pollinterval="1m"            # pollceph.sh interval to check ceph status
+closuretime="30"             # added to end of COSbencn workstages
+sleeptime="2"                # CONSTANT always in seconds
+#  Calculate runtime  (in sec)for COSbench workload XML file
+if [ $unittime == "s" ]; then
+    time_mult=1
+elif [ $unittime == "m" ]; then
+    time_mult=60
+elif [ $unittime == "h" ]; then
+    time_mult=3600
+else
+    echo "var.shinc: unknown unittime value"; exit
+fi
+# Runtime (in sec) per workstage - added to RUNTESTxml workload file 
+runtime_sec=$(( (time_mult * phasetime) + sleeptime ))
+
+# DEBUG - alternative time values for faster runtimes
+#failuretime="1m"
+#recoverytime="5m"
+
+# KEY RUNTIME VALUES - used below in PCvalues_arr and RTvalues_arr
+#
+rgwUSER="johndoe:swift"            # username
+#rgwURL="172.16.0.131:5000"                  # auth_url connection point
+rgwURL="localhost:5000"		# each client will run its own haproxy
+prepareWORKERS=72        # number of workers to use for preparing the Cluster
+#runtestWORKERS=192       # number of workers for running delWrite Workload
+runtestWORKERS=72
+#runtestWORKERS=240      # number of workers for running HYBRID Workload
+#runtestWORKERS=120      # DEBUGnumber of workers for running HYBRID Workload
+# Object sizes
+objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
+# Number of Containers and Objects
+numCONT=100
+#numOBJ=43397         # for HYBRID
+#numOBJ=3273         # for all SATURATION runs
+numOBJ=7233		# for delWRITE in BAGL
+numOBJincr=$(( (numOBJ + 1) ))      # increment by 1
+numOBJmax=$(( (numOBJ * 10) ))      # multiply by 10 for highest Object count
+# Ratios for operation types - MUST add up to 100%
+rdRatio=60
+wrRatio=20
+delRatio=10
+listRatio=10
+totalRatio=$(( (rdRatio + wrRatio + delRatio + listRatio) ))
+if [ $totalRatio -ne 100 ]; then
+    echo "var.shinc: Operation ratios (rdRatio, wrRatio, ...) must equal 100%"; exit
+fi
+# Conf portions for the Read and List operation statements
+#   - start at 4 to reserve the first 3 containers for Write and Delete ops
+rdCONF="containers=u(4,${numCONT});objects=u(1,${numOBJ})"
+listCONF="${rdCONF}"
+# Object ranges for the Write and Delete operation statements
+wrOBJ="s(${numOBJincr},${numOBJmax})"
+delOBJ="s(1,${numOBJmax})"
+#------------------------
+# writeXML.sh variables
+PREPAREtemplate="XMLtemplates/TMPL_prepCluster.xml"
+PREPARExml="prepWorkload.xml"
+# prepCluster: pre-existing keys in the PREPAREtemplate file
+declare -a PCkeys_arr=("PREPAREstorage_type"
+                       "PREPAREtimeout"
+                       "PREPAREretry"
+                       "PREPAREauth_type"
+                       "PREPAREconfig"
+                       "PREPAREworkers"
+                       "PREPAREsizes"
+                       "PREPAREnumCont"
+                       "PREPAREnumObj"
+                       )
+declare -a PCvalues_arr=("swift"               # storage type
+                         "900000"              # timeout (15m)
+                         "3"                   # retries
+                         "swauth"              # auth_type
+                         # config: a bit messy since SED requires "/" be escaped
+                         "username=${rgwUSER};password=EMPTY;auth_url=http:\/\/${rgwURL}\/auth\/1.0"
+                         "${prepareWORKERS}"   # number of workers
+                         "${objSIZES}"         # Object sizes
+                         "${numCONT}"          # number of Containers
+                         "${numOBJ}"           # number of Objects
+                         )
+
+# RUNTEST settings
+#RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
+RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
+RUNTESTxml="ioWorkload.xml"
+# runtest: pre-existing keys in the RUNTESTtemplate file
+declare -a RTkeys_arr=("RUNTESTstorage_type"
+                       "RUNTESTtimeout"
+                       "RUNTESTretry"
+                       "RUNTESTauth_type"
+                       "RUNTESTconfig"
+                       "RUNTESTworkers"
+                       "RUNTESTruntime"
+                       "RUNTESTsizes"
+                       "RUNTESTnumCont"
+                       "RUNTESTnumObj"
+                       "RUNTESTrdRatio"
+                       "RUNTESTwrRatio"
+                       "RUNTESTdelRatio"
+                       "RUNTESTlistRatio"
+                       "RUNTESTrdConf"
+                       "RUNTESTlistConf"
+                       "RUNTESTwrObj"
+                       "RUNTESTdelObj"
+                       "RUNTESTclosuretime"
+                       )
+declare -a RTvalues_arr=("swift"               # storage_type
+                         "900000"              # timeout (15m)
+                         "3"                   # retries
+                         "swauth"              # auth_type
+                         # config: a bit messy since SED requires "/" be escaped
+                         "username=${rgwUSER};password=EMPTY;auth_url=http:\/\/${rgwURL}\/auth\/1.0"
+                         "${runtestWORKERS}"   # workers
+                         "${runtime_sec}"      # runtime in seconds
+                         "${objSIZES}"         # Object sizes
+                         "${numCONT}"          # number of Containers
+                         "${numOBJ}"           # number of Objects
+                         "${rdRatio}"          # Read ratio
+                         "${wrRatio}"          # Write ratio
+                         "${delRatio}"         # Delete ratio
+                         "${listRatio}"        # List ratio
+                         "${rdCONF}"           # config for Read operations
+                         "${listCONF}"         # config for List operations
+                         "${wrOBJ}"            # object range for Write ops
+                         "${delOBJ}"           # object range for Delete ops
+                         "${closuretime}"      # workstage closure time
+                         )
+ 
+#------------------------
+# PREPCLUSTER.sh variables
+longPAUSE="400s"
+pool_list=("default.rgw.users.keys" "default.rgw.data.root" ".rgw.root" "default.rgw.control" \
+          "default.rgw.gc" "default.rgw.buckets.data" "default.rgw.buckets.index" "default.rgw.buckets.extra" \
+          "default.rgw.log" "default.rgw.meta" "default.rgw.intent-log" "default.rgw.usage" "default.rgw.users" \
+          "default.rgw.users.email" "default.rgw.users.swift" "default.rgw.users.uid")
+numREPLICAS=3                # how many replicas
+preparePTYPE=rep             # Must be rep OR ec
+if [ $preparePTYPE == "rep" ]; then
+    REPLICATION="rep"
+    k=0
+    m=0
+    pg_data=2048
+    pg_index=64
+    pg=64
+    fast_read=0
+elif [ $preparePTYPE == "ec" ]; then
+    REPLICATION="ec"
+    k=4
+    m=2
+    pg_data=4096
+    pg_index=256
+    pg=256
+    fast_read=0
+else
+    echo "Pool type needs to be defined as rep or ec in vars.shinc"; exit
+fi
+
+#------------------------
+# RUNTEST.sh vars
+# List of dependencies - verfied by 'chk_dependencies' function
+DEPENDENCIES_arr=(
+  "pbench-user-benchmark"    # monitoring framework
+  "ceph"                     # ceph cmdline tool
+  "ansible"                  # used to start/stop RGW svcs
+  "systemctl"                # controlling ceph svcs
+  )
+
+# Ceph cluster node IP addresses
+OSDhostname="smerf01"
+MONhostname="gprfc037"
+RGWhostname="smerf02"
+
+# OSD network interfaces to be taken down
+IFACE_arr=(
+  "enp130s0f0"
+  "enp130s0f1"
+  )
+
+# COSbench vars
+#cosPATH="/root/0.4.2.c4"
+cosPATH="/root/v0.4.2"
+
+# Timestamp logfile
+ts="$(date +%Y%m%d-%H%M%S)"
+
+# Name of the program being run
+PROGNAME=$(basename $0)
+
+# LOGFILE - records steps
+RESULTSDIR="./RESULTS"
+LOGFILE="${RESULTSDIR}/${PROGNAME}_${ts}.log"
+# Logfile date format, customize it to your wishes
+#   - see man date for help
+DATE='date +%Y/%m/%d:%H:%M:%S'
+
+# END GLOBAL VARIABLES
+#--------------------------------------------------------------------
