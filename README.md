@@ -9,3 +9,5 @@ Inventory of scripts:
 - fillCluster.sh    invokes fillWorkload.xml
 - runDELWRITE.sh    invokes DELWRITE_1M.xml
 - Utils/pollGC.sh   called by runDELWRITE.sh to periodically report stats
+
+NOTE: the swift login credentials in each XML file will need to be replaced for your cluster
