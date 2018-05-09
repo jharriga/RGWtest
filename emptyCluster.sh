@@ -13,6 +13,7 @@ rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
 pendingGC=`radosgw-admin gc list --include-all | wc -l`
 echo "Starting statistics:"
 echo "   %RAW USED ${rawUsed} : Pending GCs ${pendingGC}" 
+date
 
 
 # Run the COSbench workload to empty the cluster
@@ -25,6 +26,7 @@ rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
 pendingGC=`radosgw-admin gc list --include-all | wc -l`
 echo "Ending statistics:"
 echo "   %RAW USED ${rawUsed} : Pending GCs ${pendingGC}" 
+date
 
 
 # DONE
