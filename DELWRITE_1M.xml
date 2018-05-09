@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="DELWRITE_1M" description="COSbench testing">
+
+
+<!-- Initialization -->
+  <storage type="swift" config="timeout=900000" retry="3"/>
+  <auth type="swauth" config="username=johndoe:swift;password=ihHDz4fiNlJlDPZPTD7AB7eGwqjNQP8lLXvw7aoY;auth_url=http://localhost:5000/auth/1.0"/>
+
+<workflow>
+
+<!-- MAIN - delWrite workload -->
+<workstage name="MAIN">
+    <work name="main" type="normal" interval="10" division="object"
+          chunked="false" rampup="0" rampdown="0" workers="160" runtime="60">
+        <operation type="write" ratio="50" config="cprefix=bucket; containers=u(1,10);
+                   objects=u(1,10000000); sizes=c(1)MB"/>
+        <operation type="delete" ratio="50" config="cprefix=bucket; containers=u(1,10);
+                   objects=u(1,10000000)"/>
+    </work>
+</workstage>
+
+</workflow>
+
+</workload>
