@@ -5,6 +5,7 @@ Uses COSbench to generate RGW operations.
 All three scripts report on %RAW USED and Pending GC's
 
 Inventory of scripts:
+- resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Injects passwd into XML files
 - emptyCluster.sh   invokes emptyWorkload.xml
 - fillCluster.sh    invokes fillWorkload.xml
 - runDELWRITE.sh    invokes DELWRITE_1M.xml
