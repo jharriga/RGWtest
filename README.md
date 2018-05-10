@@ -14,7 +14,7 @@ Inventory of scripts:
 NOTE: the swift login credentials in each XML file will need to be replaced for your cluster
 
 RUN PROCEDURE:
-  - # resetRGW.sh
-  - # fillCluster.sh
-  - # runDELWRITE.sh
-  - # emptyCluster.sh
+  - resetRGW.sh
+  - fillCluster.sh
+  - runDELWRITE.sh
+  - emptyCluster.sh
