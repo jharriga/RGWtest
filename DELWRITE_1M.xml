@@ -13,9 +13,9 @@
     <work name="main" type="normal" interval="10" division="object"
           chunked="false" rampup="0" rampdown="0" workers="160" runtime="60">
         <operation type="write" ratio="50" config="containers=u(1,10);
-                   objects=u(1,8700000); sizes=c(1)MB"/>
+                   objects=u(1,2900000); sizes=c(1)MB"/>
         <operation type="delete" ratio="50" config="containers=u(1,10);
-                   objects=u(1,8700000)"/>
+                   objects=u(1,2900000)"/>
     </work>
 </workstage>
 
