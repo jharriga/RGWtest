@@ -43,4 +43,5 @@ while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
 done
 
 updatelog "** 75% fill mark hit: POLLGC ending" $log
-#echo " " | mail -s "POLLGC completed" user@company.net
+
+#echo " " | mail -s "POLLGC fill mark hit - terminated" user@company.net
