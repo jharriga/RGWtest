@@ -7,7 +7,7 @@ All scripts create logfiles in RESULTS directory
 
 # Inventory of scripts:
 - writeXML.sh       writes the three XML files from the Templates (found in 'XMLtemplates' dir)
-- resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Injects passwd into XML files
+- resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Inserts passwd into XML files
 - emptyCluster.sh   invokes emptyWorkload.xml (runs cleanup and dispose operations)
 - fillCluster.sh    invokes fillWorkload.xml
 - runIOworkload.sh  invokes ioWorkload.xml
@@ -17,8 +17,8 @@ All scripts create logfiles in RESULTS directory
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
 
 # RUN PROCEDURE:
-  - edit vars.shin
-  - writeXML.sh
+  - edit vars.shinc
+  - writeXML.sh        <-- you must run either 'resetRGW.sh' or 'copyPasswd.sh'
   - resetRGW.sh
   - fillCluster.sh
   - runIOworkload.sh
