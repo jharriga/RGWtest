@@ -3,9 +3,10 @@ scripts to investigate RGW garbage collection rates
 
 Uses COSbench to generate RGW operations.
 All three scripts report on %RAW USED and Pending GC's
-all scripts create logfiles in RESULTS directory
+All scripts create logfiles in RESULTS directory
 
 # Inventory of scripts:
+- writeXML.sh       writes the three XML files from the Templates (found in 'XMLtemplates' dir)
 - resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Injects passwd into XML files
 - emptyCluster.sh   invokes emptyWorkload.xml (runs cleanup and dispose operations)
 - fillCluster.sh    invokes fillWorkload.xml
@@ -16,6 +17,8 @@ all scripts create logfiles in RESULTS directory
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
 
 # RUN PROCEDURE:
+  - edit vars.shin
+  - writeXML.sh
   - resetRGW.sh
   - fillCluster.sh
   - runIOworkload.sh
