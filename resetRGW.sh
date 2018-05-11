@@ -81,11 +81,11 @@ ssh $RGWhostname 'radosgw-admin user create --uid=johndoe --display-name="John D
 ssh $RGWhostname 'radosgw-admin subuser create --uid=johndoe --subuser=johndoe:swift --access=full' 
 
 # Edit the Password into the XML workload files
-echo "inserting new password into XML files $PREPARExml, $RUNTESTxml"
+echo "inserting new password into XML files $FILLxml, $EMPTYxml, $RUNTESTxml"
 key=$(ssh $RGWhostname 'radosgw-admin user info --uid=johndoe | grep secret_key' | tail -1 | awk '{print $2}' | sed 's/"//g')
-sed  -i "s/password=.*;/password=$key;/g" emptyWorkload.xml
-sed  -i "s/password=.*;/password=$key;/g" fillWorkload.xml
-sed  -i "s/password=.*;/password=$key;/g" DELWRITE_1M.xml
+sed  -i "s/password=.*;/password=$key;/g" ${FILLxml}
+sed  -i "s/password=.*;/password=$key;/g" ${EMPTYxml}
+sed  -i "s/password=.*;/password=$key;/g" ${RUNTESTxml}
 
 echo "$PROGNAME: Done"	
 
