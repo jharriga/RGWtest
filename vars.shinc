@@ -5,95 +5,94 @@
 #------------------------
 # Runtimes for various phases
 # WARNING: if you change these you need to re-run 'writeXML.sh'
-unittime="m"                 # unit for time values (s=sec; m=min; h=hr)
-starttime="10"
-failuretime="5"
-#failuretime="3"
-recoverytime="60"
-#recoverytime="10"
-phasetime=$(( starttime + failuretime + recoverytime ))
-pollinterval="1m"            # pollceph.sh interval to check ceph status
-closuretime="30"             # added to end of COSbencn workstages
-sleeptime="2"                # CONSTANT always in seconds
-#  Calculate runtime  (in sec)for COSbench workload XML file
-if [ $unittime == "s" ]; then
-    time_mult=1
-elif [ $unittime == "m" ]; then
-    time_mult=60
-elif [ $unittime == "h" ]; then
-    time_mult=3600
-else
-    echo "var.shinc: unknown unittime value"; exit
-fi
-# Runtime (in sec) per workstage - added to RUNTESTxml workload file 
-runtime_sec=$(( (time_mult * phasetime) + sleeptime ))
+pollinterval="1m"            # pollGC.sh interval to check ceph status
+# Runtime (in sec)  
+runtime_sec="180"
 
-# DEBUG - alternative time values for faster runtimes
-#failuretime="1m"
-#recoverytime="5m"
-
-# KEY RUNTIME VALUES - used below in PCvalues_arr and RTvalues_arr
+# KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
 #
 rgwUSER="johndoe:swift"            # username
 #rgwURL="172.16.0.131:5000"                  # auth_url connection point
 rgwURL="localhost:5000"		# each client will run its own haproxy
-prepareWORKERS=72        # number of workers to use for preparing the Cluster
+#fillWORKERS=72        # number of workers to use for filling the Cluster
+fillWORKERS=15        # number of workers to use for filling the Cluster
 #runtestWORKERS=192       # number of workers for running delWrite Workload
-runtestWORKERS=72
+runtestWORKERS=15
 #runtestWORKERS=240      # number of workers for running HYBRID Workload
 #runtestWORKERS=120      # DEBUGnumber of workers for running HYBRID Workload
+#
 # Object sizes
-objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
+#objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
+objSIZES="h(1|1|50,64|64|15,8192|8192|15,65536|65536|15,1048576|1048576|5)KB"
+#
 # Number of Containers and Objects
-numCONT=100
-#numOBJ=43397         # for HYBRID
-#numOBJ=3273         # for all SATURATION runs
-numOBJ=7233		# for delWRITE in BAGL
-numOBJincr=$(( (numOBJ + 1) ))      # increment by 1
-numOBJmax=$(( (numOBJ * 10) ))      # multiply by 10 for highest Object count
+numCONT=5
+#numOBJ=22000   # for 25% fill
+#numOBJ=43397   # for 50% fill
+#numOBJ=3273    # for all SATURATION runs
+#numOBJ=7233     # for delWRITE in BAGL
+numOBJ=500     # for delWRITE in BAGL
+# highest object range for WRITE and DELETE operations
+numOBJmax=$(( (numOBJ * 10) ))  # multiply by ten for highest Object Count
+
+#########
+# DELWRITE workload
+# Container ranges for the Write and Delete operation statements
+wrCONT="u(1,2)"
+delCONT="u(1,2)"
+# Object ranges for the Write and Delete operation statements
+# TO ENSURE that we are legitimately writing new objects, we are
+#      using a higher objcnt for these than read/list operations
+wrOBJ="u(1,${numOBJmax})"
+delOBJ="u(1,${numOBJmax})"
+
+#########
+# HYBRID Workload
 # Ratios for operation types - MUST add up to 100%
 rdRatio=60
-wrRatio=20
-delRatio=10
+wrRatio=16
+delRatio=14
 listRatio=10
 totalRatio=$(( (rdRatio + wrRatio + delRatio + listRatio) ))
 if [ $totalRatio -ne 100 ]; then
     echo "var.shinc: Operation ratios (rdRatio, wrRatio, ...) must equal 100%"; exit
 fi
 # Conf portions for the Read and List operation statements
-#   - start at 4 to reserve the first 3 containers for Write and Delete ops
-rdCONF="containers=u(4,${numCONT});objects=u(1,${numOBJ})"
+#   - start at 3 to reserve the first 2 containers for Write and Delete ops
+rdCONF="containers=u(3,${numCONT});objects=u(1,${numOBJ})"
 listCONF="${rdCONF}"
-# Object ranges for the Write and Delete operation statements
-wrOBJ="s(${numOBJincr},${numOBJmax})"
-delOBJ="s(1,${numOBJmax})"
+
 #------------------------
 # writeXML.sh variables
-PREPAREtemplate="XMLtemplates/TMPL_prepCluster.xml"
-PREPARExml="prepWorkload.xml"
-# prepCluster: pre-existing keys in the PREPAREtemplate file
-declare -a PCkeys_arr=("PREPAREstorage_type"
-                       "PREPAREtimeout"
-                       "PREPAREretry"
-                       "PREPAREauth_type"
-                       "PREPAREconfig"
-                       "PREPAREworkers"
-                       "PREPAREsizes"
-                       "PREPAREnumCont"
-                       "PREPAREnumObj"
+FILLtemplate="XMLtemplates/TMPL_fillCluster.xml"
+FILLxml="fillWorkload.xml"
+EMPTYtemplate="XMLtemplates/TMPL_emptyCluster.xml"
+EMPTYxml="emptyWorkload.xml"
+# fillCluster: pre-existing keys in the template file
+# also used to populate EMPTYxml
+declare -a FILLkeys_arr=("FILLstorage_type"
+                       "FILLtimeout"
+                       "FILLretry"
+                       "FILLauth_type"
+                       "FILLconfig"
+                       "FILLworkers"
+                       "FILLsizes"
+                       "FILLnumCont"
+                       "FILLnumObj"
                        )
-declare -a PCvalues_arr=("swift"               # storage type
+declare -a FILLvalues_arr=("swift"               # storage type
                          "900000"              # timeout (15m)
                          "3"                   # retries
                          "swauth"              # auth_type
                          # config: a bit messy since SED requires "/" be escaped
                          "username=${rgwUSER};password=EMPTY;auth_url=http:\/\/${rgwURL}\/auth\/1.0"
-                         "${prepareWORKERS}"   # number of workers
+                         "${fillWORKERS}"   # number of workers
                          "${objSIZES}"         # Object sizes
                          "${numCONT}"          # number of Containers
                          "${numOBJ}"           # number of Objects
                          )
 
+#------------------------
 # RUNTEST settings
 #RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
 RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
@@ -115,9 +114,10 @@ declare -a RTkeys_arr=("RUNTESTstorage_type"
                        "RUNTESTlistRatio"
                        "RUNTESTrdConf"
                        "RUNTESTlistConf"
+                       "RUNTESTwrCont"
+                       "RUNTESTdelCont"
                        "RUNTESTwrObj"
                        "RUNTESTdelObj"
-                       "RUNTESTclosuretime"
                        )
 declare -a RTvalues_arr=("swift"               # storage_type
                          "900000"              # timeout (15m)
@@ -136,13 +136,14 @@ declare -a RTvalues_arr=("swift"               # storage_type
                          "${listRatio}"        # List ratio
                          "${rdCONF}"           # config for Read operations
                          "${listCONF}"         # config for List operations
+                         "${wrCONT}"           # container range for Write ops
+                         "${delCONT}"          # container range for Delete ops
                          "${wrOBJ}"            # object range for Write ops
                          "${delOBJ}"           # object range for Delete ops
-                         "${closuretime}"      # workstage closure time
                          )
  
 #------------------------
-# PREPCLUSTER.sh variables
+# resetRGW.sh variables
 longPAUSE="400s"
 pool_list=("default.rgw.users.keys" "default.rgw.data.root" ".rgw.root" "default.rgw.control" \
           "default.rgw.gc" "default.rgw.buckets.data" "default.rgw.buckets.index" "default.rgw.buckets.extra" \
@@ -172,24 +173,10 @@ fi
 
 #------------------------
 # RUNTEST.sh vars
-# List of dependencies - verfied by 'chk_dependencies' function
-DEPENDENCIES_arr=(
-  "pbench-user-benchmark"    # monitoring framework
-  "ceph"                     # ceph cmdline tool
-  "ansible"                  # used to start/stop RGW svcs
-  "systemctl"                # controlling ceph svcs
-  )
 
 # Ceph cluster node IP addresses
-OSDhostname="smerf01"
 MONhostname="gprfc037"
 RGWhostname="smerf02"
-
-# OSD network interfaces to be taken down
-IFACE_arr=(
-  "enp130s0f0"
-  "enp130s0f1"
-  )
 
 # COSbench vars
 #cosPATH="/root/0.4.2.c4"
