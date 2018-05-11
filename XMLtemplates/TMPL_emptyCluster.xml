@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="emptyCluster" description="RGW GCrate testing">
+
+<!-- Initialization -->
+  <storage type="FILLstorage_type" config="timeout=FILLtimeout" retry="FILLretry"/>
+  <auth type="FILLauth_type" config="FILLconfig" />
+
+  <workflow>
+
+<!-- cleanup -->
+    <workstage name="cleanup">
+        <work type="cleanup" workers="FILLworkers" config="containers=r(1,FILLnumCont); objects=r(1,FILLnumObj)"/>
+    </workstage>
+
+<!-- dispose -->
+    <workstage name="dispose">
+        <work type="dispose" workers="1" config="containers=r(1,FILLnumCont)"/>
+    </workstage>
+
+  </workflow>
+
+</workload>
