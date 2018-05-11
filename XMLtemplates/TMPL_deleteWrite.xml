@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="delete_write" description="RGW GCrate testing">
+
+
+<!-- Initialization -->
+  <storage type="RUNTESTstorage_type" config="timeout=RUNTESTtimeout" retry="RUNTESTretry"/>
+  <auth type="RUNTESTauth_type" config="RUNTESTconfig"/>
+
+  <workflow>
+
+<!-- Use object counts and object sizes as defined in vars.shinc -->
+
+    <workstage name="MAIN">
+        <work name="writeDelete" workers="RUNTESTworkers" runtime="RUNTESTruntime" >
+            <operation name="writeOP" type="write" ratio="50" config="containers=RUNTESTwrCont;objects=RUNTESTwrObj;sizes=RUNTESTsizes" />
+	    <operation name="deleteOP" type="delete" ratio="50" config="containers=RUNTESTdelCont;objects=RUNTESTdelObj" />
+        </work>
+    </workstage>
+
+  </workflow>
+
+</workload>
