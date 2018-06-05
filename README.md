@@ -33,6 +33,7 @@ Based on a cluster with these parameters:
 the following object count (per container) produces the following fill levels:
 - 25% full == 1.45M obj per container, 14.5M total objects
 - 50% full == 2.9M objects per container, 29M total objects
+
 Those values were calculated using this formula:
 - Raw Capacity of 174TB / 3 = 58TB  (factor in 3way repl)
 - 58TB / 10 = 5.8TB   (factor in 10 containers)
