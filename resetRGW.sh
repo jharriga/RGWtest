@@ -19,7 +19,7 @@ function delete_pools {
   done
 
   sleep 5
-  #ceph osd crush rule rm default.rgw.buckets.data
+  ceph osd crush rule rm default.rgw.buckets.data
 }
 
 function create_pools {
@@ -36,7 +36,7 @@ function create_pools {
 
   for pl in ${pool_list[@]}; do
       if [ $pl == "default.rgw.buckets.data" ]; then
-          ceph osd pool create $pl $pg_data $cmd_tail
+          ceph osd pool create $pl $pg_data $cmdtail
           if [ "$1" == "rep" ]; then
               ceph osd pool set $pl size "${numREPLICAS}"
           fi
