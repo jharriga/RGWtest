@@ -30,6 +30,7 @@ function create_pools {
       ceph osd erasure-code-profile rm myprofile
       ceph osd erasure-code-profile set myprofile k=$k m=$m \
         crush-failure-domain=osd
+      ceph osd crush rule create-erasure default.rgw.buckets.data myprofile
   else
       echo "unknown value for REPLICATION in create_pools"; exit
   fi
