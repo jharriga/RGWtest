@@ -72,7 +72,8 @@ delete_pools
 echo "Creating new pools"
 create_pools $REPLICATION
 
-echo "sleeping for $longPAUSE seconds..."; sleep "${longPAUSE}"
+# echo "sleeping for $longPAUSE seconds..."; sleep "${longPAUSE}"
+echo "sleeping for 30 seconds..."; sleep 30
 
 echo "Starting RGWs"
 ansible -m shell -a 'systemctl start ceph-radosgw@rgw.`hostname -s`.service' rgws
