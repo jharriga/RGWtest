@@ -60,4 +60,7 @@ updatelog "$var1$var2" $LOGFILE
 var3=`radosgw-admin gc list --include-all | wc -l`
 updatelog "Pending GC's == $var3" $LOGFILE
 
+# waits for number of pending GCs to reach 1
+Utils/completedGC.sh "${pollinterval}" "${LOGFILE}"
+
 # END
