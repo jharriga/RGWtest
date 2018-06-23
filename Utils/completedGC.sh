@@ -17,9 +17,9 @@ source "$myPath/../vars.shinc"
 source "$myPath/../Utils/functions.shinc"
 
 # check for passed arguments
-[ $# -ne 2 ] && error_exit "POLLGC.sh failed - wrong number of args"
-[ -z "$1" ] && error_exit "POLLGC.sh failed - empty first arg"
-[ -z "$2" ] && error_exit "POLLGC.sh failed - empty second arg"
+[ $# -ne 2 ] && error_exit "completedGC.sh failed - wrong number of args"
+[ -z "$1" ] && error_exit "completedGC.sh failed - empty first arg"
+[ -z "$2" ] && error_exit "completedGC.sh failed - empty second arg"
 
 interval=$1          # how long to sleep between polling
 log=$2               # the logfile to write to
