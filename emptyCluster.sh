@@ -51,5 +51,10 @@ updatelog "Pending GC's == $var3" $LOGFILE
 # waits for number of pending GCs to reach 1
 Utils/completedGC.sh "${pollinterval}" "${LOGFILE}"
 
+# Record ENDING cluster capacity and GC stats
+var1=`echo; ceph df | head -n 5`
+var2=`echo; ceph df | grep rgw.buckets.data`
+updatelog "$var1$var2" $LOGFILE
+
 updatelog "$PROGNAME: Done" $LOGFILE
 # DONE
