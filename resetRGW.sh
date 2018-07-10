@@ -28,7 +28,7 @@ function create_pools {
   elif [ "$1" == "ec" ]; then
       cmdtail="erasure myprofile"
       ceph osd erasure-code-profile rm myprofile
-      ceph osd erasure-code-profile set myprofile k=$k m=$m \
+      ceph osd erasure-code-profile set myprofile k=$k m=$m
 ##        crush-failure-domain=osd  # use default of 'host'
       ceph osd crush rule create-erasure default.rgw.buckets.data myprofile
   else
