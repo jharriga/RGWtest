@@ -50,10 +50,15 @@ function create_pools {
       fi
   done
 
-  # enable RGW on the pools
-  for pool in $(rados lspools); do
-      ceph osd pool application enable $pool rgw
-  done
+  CEPH_VERSION=`ceph --version`
+  # enable RGW on the pools for RHCS 3.x builds
+  if echo $CEPH_VERSION | grep -q "10.2." ; then
+    echo "Skip pool enable for 2.5 versions"
+  else
+    for pool in $(rados lspools); do
+       ceph osd pool application enable $pool rgw
+    done
+  fi
 }
 
 # END FUNCTIONS
