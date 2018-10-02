@@ -1,9 +1,9 @@
-# GCrate
-scripts to investigate RGW garbage collection rates
+# RGWtest
+scripts to investigate RGW performance and log statistics (garbage collection
+rates as well as radosgw and ceph-osd process statistics)
 
-Uses COSbench to generate RGW operations.
-All three scripts report on %RAW USED and Pending GC's
-All scripts create logfiles in RESULTS directory
+Uses COSbench to issue RGW operations.
+All scripts create timestamped logfiles in RESULTS directory
 
 # Inventory of scripts:
 - writeXML.sh       writes the three XML files from the Templates (found in 'XMLtemplates' dir)
@@ -12,7 +12,7 @@ All scripts create logfiles in RESULTS directory
 - fillCluster.sh    invokes fillWorkload.xml
 - runIOworkload.sh  invokes ioWorkload.xml
 - copyPasswd.sh     inserts the RGW password into the three XML workload files
-- Utils/pollGC.sh   called by runIOworkload.sh to periodically report stats
+- Utils/poll.sh     called by runIOworkload.sh to periodically log stats
 
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
 
