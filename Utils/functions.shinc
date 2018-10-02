@@ -1,0 +1,80 @@
+#--------------------------------------
+# FUNCTIONS
+function updatelog {
+# Echoes passed string to LOGFILE and stdout
+    logfn=$2
+
+    echo `$DATE`": $1" 2>&1 | tee -a $logfn
+}
+
+function print_Runtime {
+  logfile=$1
+
+  echo "Runtime Environment:" | tee -a $logfile
+  echo -n "> "; uname -a | tee -a $logfile
+  if [ -f /etc/redhat-release ]; then
+    echo -n "> "; cat /etc/redhat-release | tee -a $logfile
+  fi
+  echo -n "> "; ceph --version | tee -a $logfile
+
+# Write key variable values to LOGFILE
+  echo "Key Variable Values:" | tee -a $logfile
+  updatelog "> jobtime=${jobtime}" $logfile
+  updatelog "> failuretime=${failuretime}" $logfile
+  updatelog "> recoverytime=${recoverytime}" $logfile
+  updatelog "> polltime=${polltime}" $logfile
+  echo "Cluster variable settings:" | tee -a $logfile
+  updatelog "> OSDnode=${OSDnode}" $logfile
+  updatelog "> MONnode=${MONnode}" $logfile
+  echo "COSbench variable settings:" | tee -a $logfile
+  updatelog "> XMLfill=${XMLfill}" $logfile
+  updatelog "> XMLworkload=${XMLworkload}" $logfile
+  updatelog "---------------------------------" $logfile
+}
+
+function error_exit {
+# Function for exit due to fatal program error
+# Accepts 1 argument:
+#   string containing descriptive error message
+# Copied from - http://linuxcommand.org/wss0150.php
+    echo "${PROGNAME}: ${1:-"Unknown Error"} ABORTING..." 1>&2
+    exit 1
+}
+
+function chk_dependencies {
+  for cmd in "${DEPENDENCIES_arr[@]}"; do
+    command -v $cmd >/dev/null 2>&1 || \
+      error_exit "I require ${cmd} but it's not installed."
+  done
+}
+
+function get_time() {
+  date |awk '{print $2$3"."$4}'
+}
+
+# collection of 'get_' routines used by POLL.sh
+function get_rawUsed() {
+# NOTE: this may need to be $7 rather than $4 <<<<<<<<
+  rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
+}
+
+function get_pendingGC() {
+  pendingGC=`radosgw-admin gc list --include-all | wc -l`
+}
+
+function get_upTime() {
+  upTime=`ssh $RGWhostname uptime | awk -F'[a-z]:' '{ print $2}'`
+}
+
+function get_rgwStats() {
+  rgwStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep radosgw`
+}
+
+function get_osdStats() {
+  osdStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
+}
+
+#
+#
+# END FUNCTIONS
+#--------------------------------------
