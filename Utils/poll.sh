@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# POLL.sh
+#   Polls ceph and logs stats and writes to LOGFILE
+#
+
+# Bring in other script files
+myPath="${BASH_SOURCE%/*}"
+if [[ ! -d "$myPath" ]]; then
+    myPath="$PWD"
+fi
+
+# Variables
+source "$myPath/../vars.shinc"
+
+# Functions
+# defines: 'get_' routines
+source "$myPath/../Utils/functions.shinc"
+
+# check for passed arguments
+[ $# -ne 2 ] && error_exit "POLL.sh failed - wrong number of args"
+[ -z "$1" ] && error_exit "POLL.sh failed - empty first arg"
+[ -z "$2" ] && error_exit "POLL.sh failed - empty second arg"
+
+interval=$1          # how long to sleep between polling
+log=$2               # the logfile to write to
+DATE='date +%Y/%m/%d:%H:%M:%S'
+
+# update log file  
+updatelog "** POLL started" $log
+
+###########################################################
+# append GC status to LOGFILE
+##rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
+##pendingGC=`radosgw-admin gc list --include-all | wc -l`
+get_rawUsed
+get_pendingGC
+echo -n "GC: " >> $log   # prefix line with GC label for parsing
+updatelog "%RAW USED ${rawUsed}; Pending GCs ${pendingGC}" $log
+threshold="75.0"
+
+# keep polling until cluster reaches 'threshold' % fill mark
+while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
+    # RGW system Load Average
+    echo -n "LA: " >> $log        # prefix line with stats label
+    ##upTime=`ssh $RGWhostname uptime | awk -F'[a-z]:' '{ print $2}'`
+    get_upTime
+    updatelog "${RGWhost} ${upTime}" $log
+
+    # RGW radosgw PROCESS and MEM stats
+    echo -n "RGW: " >> $log        # prefix line with stats label
+    ##rgwStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep radosgw`
+    get_rgwStats
+    updatelog "${RGWhostname} ${rgwStats}" $log
+
+    # ceph-osd PROCESS and MEM stats
+    echo -n "OSD: " >> $log        # prefix line with stats label
+    ##osdStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
+    get_osdStats
+    updatelog "${RGWhostname} ${osdStats}" $log
+
+    # Sleep for the poll interval
+    sleep "${interval}"
+
+    # Record the %RAW USED and pending GC count
+# NOTE: this may need to be $7 rather than $4 <<<<<<<<
+    ##rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
+    ##pendingGC=`radosgw-admin gc list --include-all | wc -l`
+    get_rawUsed
+    get_pendingGC
+    echo -n "GC: " >> $log
+    updatelog "%RAW USED ${rawUsed}; Pending GCs ${pendingGC}" $log
+done
+
+echo -n "POLL.sh: " >> $log   # prefix line with label for parsing
+updatelog "** 75% fill mark hit: POLL ending" $log
+
+#echo " " | mail -s "POLLGC fill mark hit - terminated" user@company.net
+
+# DONE
