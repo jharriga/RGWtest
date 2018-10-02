@@ -68,6 +68,6 @@ done
 echo -n "POLL.sh: " >> $log   # prefix line with label for parsing
 updatelog "** 75% fill mark hit: POLL ending" $log
 
-#echo " " | mail -s "POLLGC fill mark hit - terminated" user@company.net
+#echo " " | mail -s "POLL fill mark hit - terminated" user@company.net
 
 # DONE
