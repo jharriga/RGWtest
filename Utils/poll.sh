@@ -31,8 +31,6 @@ updatelog "** POLL started" $log
 
 ###########################################################
 # append GC status to LOGFILE
-##rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
-##pendingGC=`radosgw-admin gc list --include-all | wc -l`
 get_rawUsed
 get_pendingGC
 echo -n "GC: " >> $log   # prefix line with GC label for parsing
@@ -43,19 +41,16 @@ threshold="75.0"
 while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
     # RGW system Load Average
     echo -n "LA: " >> $log        # prefix line with stats label
-    ##upTime=`ssh $RGWhostname uptime | awk -F'[a-z]:' '{ print $2}'`
     get_upTime
     updatelog "${RGWhost} ${upTime}" $log
 
     # RGW radosgw PROCESS and MEM stats
-    echo -n "RGW: " >> $log        # prefix line with stats label
-    ##rgwStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep radosgw`
+    echo -n "RGW: " >> $log        # prefix line with stats label`
     get_rgwStats
     updatelog "${RGWhostname} ${rgwStats}" $log
 
     # ceph-osd PROCESS and MEM stats
     echo -n "OSD: " >> $log        # prefix line with stats label
-    ##osdStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
     get_osdStats
     updatelog "${RGWhostname} ${osdStats}" $log
 
@@ -64,8 +59,6 @@ while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
 
     # Record the %RAW USED and pending GC count
 # NOTE: this may need to be $7 rather than $4 <<<<<<<<
-    ##rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
-    ##pendingGC=`radosgw-admin gc list --include-all | wc -l`
     get_rawUsed
     get_pendingGC
     echo -n "GC: " >> $log
