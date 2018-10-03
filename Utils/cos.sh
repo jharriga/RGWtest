@@ -30,3 +30,8 @@ while [ $running -eq 1 ]; do
 done
 
 updatelog "COSbench jobID: $jobId - Completed" $log
+
+## send COSbench jobID value back to caller
+echo "${jobId}" > ${TMPfile}
+
+# DONE
