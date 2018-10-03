@@ -28,7 +28,6 @@ var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
 # Record GC stats
-#var3=`radosgw-admin gc list --include-all | wc -l`
 get_pendingGC
 echo -n "GC: " >> $LOGFILE
 updatelog "Pending GC's == $pendingGC" $LOGFILE
@@ -60,7 +59,6 @@ var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
 # Record GC stats
-#var3=`radosgw-admin gc list --include-all | wc -l`
 get_pendingGC
 echo -n "GC: " >> $LOGFILE
 updatelog "Pending GC's == $pendingGC" $LOGFILE
@@ -72,5 +70,14 @@ Utils/completedGC.sh "${pollinterval}" "${LOGFILE}"
 var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
+
+# Rename LOGFILE (vars.shinc)
+# prepend w/$jobId from cos.sh script (sent via $TMPfile)
+updatelog "Renaming LOGFILE with COSbench jobId prefix" $LOGFILE
+jobId=$(cat "${TMPfile}")
+echo "JOBID: ${jobId}"
+LOGFINAL="${RESULTSDIR}/${jobId}_${PROGNAME}_${ts}.log"
+echo "LOGFINAL: ${LOGFINAL}"
+mv $LOGFILE $LOGFINAL
 
 # END
