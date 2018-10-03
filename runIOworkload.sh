@@ -46,6 +46,7 @@ updatelog "POLL backgrd processID $PIDpoll" $LOGFILE
 updatelog "START: cosbench launched" $LOGFILE
 
 # Start the COSbench I/O workload
+# cos.sh passes $jobId back via $TMPfile - used as prefix for $LOGFILE
 ./Utils/cos.sh ${myPath}/${RUNTESTxml} $LOGFILE 
 
 updatelog "END: cosbench done" $LOGFILE
