@@ -190,6 +190,7 @@ PROGNAME=$(basename $0)
 
 # LOGFILE - records steps
 RESULTSDIR="./RESULTS"
+TMPfile="/tmp/jobId.tmp"
 LOGFILE="${RESULTSDIR}/${PROGNAME}_${ts}.log"
 # Logfile date format, customize it to your wishes
 #   - see man date for help
