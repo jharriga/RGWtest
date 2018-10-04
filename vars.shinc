@@ -2,24 +2,21 @@
 # START GLOBAL VARIABLES
 #
 
-#------------------------
-# Runtimes for various phases
-# WARNING: if you change these you need to re-run 'writeXML.sh'
-pollinterval="1m"            # pollGC.sh interval to check ceph status
-# Runtime (in sec)  
-runtime_sec="180"
+pollinterval="1m"            # poll.sh interval to gather statistics
 
+#----------------------------------------------------------------------
+# Runtimes for various COSbench workstages
+# WARNING: if you change these you need to re-run 'writeXML.sh'
 # KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
 #
-rgwUSER="johndoe:swift"            # username
-#rgwURL="172.16.0.131:5000"                  # auth_url connection point
-rgwURL="localhost:5000"		# each client will run its own haproxy
-#fillWORKERS=72        # number of workers to use for filling the Cluster
-fillWORKERS=15        # number of workers to use for filling the Cluster
-#runtestWORKERS=192       # number of workers for running delWrite Workload
-runtestWORKERS=15
-#runtestWORKERS=240      # number of workers for running HYBRID Workload
-#runtestWORKERS=120      # DEBUGnumber of workers for running HYBRID Workload
+runtime_sec="180"                 # Runtime (in sec)  
+rgwUSER="johndoe:swift"           # username
+#rgwURL="172.16.0.131:5000"       # auth_url connection point
+rgwURL="localhost:5000"		      # each client will run its own haproxy
+#fillWORKERS=72         # number of workers to use for filling the Cluster
+fillWORKERS=15         # number of workers to use for filling the Cluster
+#runtestWORKERS=192     # number of workers for running IOWorkload
+runtestWORKERS=15      # number of workers for running IOWorkload
 #
 # Object sizes
 #objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
@@ -27,16 +24,15 @@ objSIZES="h(1|1|50,64|64|15,8192|8192|15,65536|65536|15,1048576|1048576|5)KB"
 #
 # Number of Containers and Objects
 numCONT=5
-#numOBJ=22000   # for 25% fill
-#numOBJ=43397   # for 50% fill
-#numOBJ=3273    # for all SATURATION runs
-#numOBJ=7233     # for delWRITE in BAGL
-numOBJ=500     # for delWRITE in BAGL
+#numOBJ=22000              # e.g. for 25% fill
+#numOBJ=43397              # e.g. for 50% fill
+numOBJ=500                # for delWRITE in BAGL
 # highest object range for WRITE and DELETE operations
-numOBJmax=$(( (numOBJ * 10) ))  # multiply by ten for highest Object Count
+#numOBJmax=$(( (numOBJ * 10) ))  # multiply by ten for growing Object Count
+numOBJmax=$numOBJ                # multiply by ten for steady-state Object Count
 
 #########
-# DELWRITE workload
+# DELWRITE workload specific variables
 # Container ranges for the Write and Delete operation statements
 wrCONT="u(1,2)"
 delCONT="u(1,2)"
@@ -47,7 +43,7 @@ wrOBJ="u(1,${numOBJmax})"
 delOBJ="u(1,${numOBJmax})"
 
 #########
-# HYBRID Workload
+# HYBRID Workload specific variables
 # Ratios for operation types - MUST add up to 100%
 rdRatio=60
 wrRatio=16
@@ -59,11 +55,16 @@ if [ $totalRatio -ne 100 ]; then
 fi
 # Conf portions for the Read and List operation statements
 #   - start at 3 to reserve the first 2 containers for Write and Delete ops
+# NOTE: COSbench will FAIL if job attempts to READ a non-existing Object
 rdCONF="containers=u(3,${numCONT});objects=u(1,${numOBJ})"
 listCONF="${rdCONF}"
 
-#------------------------
+#-----------------------------------------------------------------------
 # writeXML.sh variables
+# Names of COSbench workload files and values to insert into template files
+#
+# First up - fill/empty workloads
+# These workloads are initiated by the fillCluster.sh/emptyCluster.sh scripts
 FILLtemplate="XMLtemplates/TMPL_fillCluster.xml"
 FILLxml="fillWorkload.xml"
 EMPTYtemplate="XMLtemplates/TMPL_emptyCluster.xml"
@@ -92,8 +93,9 @@ declare -a FILLvalues_arr=("swift"               # storage type
                          "${numOBJ}"           # number of Objects
                          )
 
-#------------------------
-# RUNTEST settings
+#
+# Next up - RUNTEST settings
+# This COSbench workload is initiated by the runIOworkload.sh script
 #RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
 RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
 RUNTESTxml="ioWorkload.xml"
@@ -149,32 +151,32 @@ pool_list=("default.rgw.users.keys" "default.rgw.data.root" ".rgw.root" "default
           "default.rgw.gc" "default.rgw.buckets.data" "default.rgw.buckets.index" "default.rgw.buckets.extra" \
           "default.rgw.log" "default.rgw.meta" "default.rgw.intent-log" "default.rgw.usage" "default.rgw.users" \
           "default.rgw.users.email" "default.rgw.users.swift" "default.rgw.users.uid")
-numREPLICAS=3                # how many replicas
-preparePTYPE=rep             # Must be rep OR ec
+numREPLICAS=3                          # how many replicas
+preparePTYPE=rep                       # Must be rep (replicated) OR ec (erasure coded)
 if [ $preparePTYPE == "rep" ]; then
     REPLICATION="rep"
     k=0
     m=0
-    pg_data=2048
-    pg_index=64
-    pg=64
+    pg_data=2048                       # determine this value by using PGCALC
+    pg_index=64                        # determine this value by using PGCALC
+    pg=64                              # determine this value by using PGCALC
     fast_read=0
 elif [ $preparePTYPE == "ec" ]; then
     REPLICATION="ec"
     k=4
     m=2
-    pg_data=4096
-    pg_index=256
-    pg=256
+    pg_data=4096                       # determine this value by using PGCALC
+    pg_index=256                       # determine this value by using PGCALC
+    pg=256                             # determine this value by using PGCALC
     fast_read=0
 else
     echo "Pool type needs to be defined as rep or ec in vars.shinc"; exit
 fi
 
 #------------------------
-# RUNTEST.sh vars
+# runIOworkload.sh vars
 
-# Ceph cluster node IP addresses
+# Ceph cluster node hostnames/IP addresses
 MONhostname="gprfc037"
 RGWhostname="smerf02"
 
