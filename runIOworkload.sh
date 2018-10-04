@@ -80,5 +80,6 @@ echo "JOBID: ${jobId}"
 LOGFINAL="${RESULTSDIR}/${jobId}_${PROGNAME}_${ts}.log"
 echo "LOGFINAL: ${LOGFINAL}"
 mv $LOGFILE $LOGFINAL
+rm $TMPfile                         # cleanup
 
 # END
