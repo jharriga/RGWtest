@@ -6,19 +6,19 @@ Uses COSbench to issue RGW operations.
 All scripts create timestamped logfiles in RESULTS directory
 
 # Inventory of scripts:
-- writeXML.sh       writes the three XML files from the Templates (found in 'XMLtemplates' dir)
+- writeXML.sh       writes the COSbench XML workload files from the Templates (found in 'XMLtemplates' dir)
 - resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Inserts passwd into XML files
 - emptyCluster.sh   invokes emptyWorkload.xml (runs cleanup and dispose operations)
-- fillCluster.sh    invokes fillWorkload.xml
-- runIOworkload.sh  invokes ioWorkload.xml
-- copyPasswd.sh     inserts the RGW password into the three XML workload files
-- Utils/poll.sh     called by runIOworkload.sh to periodically log stats
+- fillCluster.sh    invokes fillWorkload.xml (fills the cluster with numOBJ and OBJsizes as spec'd in vars.shinc)
+- runIOworkload.sh  invokes ioWorkload.xml (main test script. Executes IOworkload and logs results in RESULTS dir)
+- copyPasswd.sh     inserts the RGW password into the COSbench XML workload files
+- Utils/poll.sh     called by runIOworkload.sh to periodically log statistics (garbage collection, loadAvg, ps)
 
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
 
 # RUN PROCEDURE:
   - edit vars.shinc
-  - writeXML.sh        <-- you must run either 'resetRGW.sh' or 'copyPasswd.sh'
+  - writeXML.sh        <-- afterwards you must run either 'resetRGW.sh' or 'copyPasswd.sh'
   - resetRGW.sh
   - fillCluster.sh
   - runIOworkload.sh
