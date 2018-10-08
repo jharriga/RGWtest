@@ -39,6 +39,11 @@ threshold="75.0"
 
 # keep polling until cluster reaches 'threshold' % fill mark
 while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
+    # RESHARD activity
+    echo -n "RESHARD: " >> $log
+    get_pendingRESHARD
+    updatelog "RESHARDING Queue length ${pendingRESHARD}" $log
+    
     # RGW system Load Average
     echo -n "LA: " >> $log        # prefix line with stats label
     get_upTime
