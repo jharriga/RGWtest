@@ -48,4 +48,14 @@ updatelog "Pending GC's == $var3" $LOGFILE
 
 updatelog "$PROGNAME: Done" $LOGFILE
 
+# Rename LOGFILE (vars.shinc)
+# prepend w/$jobId from cos.sh script (sent via $TMPfile)
+updatelog "Renaming LOGFILE with COSbench jobId prefix" $LOGFILE
+jobId=$(cat "${TMPfile}")
+echo "JOBID: ${jobId}"
+LOGFINAL="${RESULTSDIR}/${jobId}_${PROGNAME}_${ts}.log"
+echo "LOGFINAL: ${LOGFINAL}"
+mv $LOGFILE $LOGFINAL
+rm $TMPfile                         # cleanup
+
 # DONE
