@@ -1,5 +1,5 @@
 #!/bin/bash
-# RESETRGW.shPRECREATE
+# RESETRGW.shPRECREATE    - this requires RHCS 3.1 and later
 # adds use of expected_num_objects to pool create (line 32)
 # this avoids filestore merge activity while the workloads are active
 
@@ -21,7 +21,9 @@ function delete_pools {
   done
 
   sleep 5
+  # Delete the CRUSH rules
   ceph osd crush rule rm default.rgw.buckets.data
+  ceph osd crush rule rm bucketindex
 }
 
 function create_pools {
@@ -45,8 +47,9 @@ function create_pools {
               ceph osd pool set $pl size "${numREPLICAS}"
           fi
       elif [ $pl == "default.rgw.buckets.index" ]; then
-          ceph osd pool create $pl $pg_index replicated
-#          ceph osd pool create $pl $pg_index replicated bucketindex
+      #    Create CRUSH rule for bucketindex on NVMe
+          ceph osd crush rule create-replicated bucketindex default host ssd
+          ceph osd pool create $pl $pg_index replicated bucketindex
           ceph osd pool set $pl size "${numREPLICAS}"
       else
           ceph osd pool create $pl $pg replicated
