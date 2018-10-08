@@ -62,6 +62,10 @@ function get_pendingGC() {
   pendingGC=`radosgw-admin gc list --include-all | wc -l`
 }
 
+function get_pendingRESHARD() {
+  pendingRESHARD=`radosgw-admin reshard list --include-all | wc -l`
+}
+
 function get_upTime() {
   upTime=`ssh $RGWhostname uptime | awk -F'[a-z]:' '{ print $2}'`
 }
