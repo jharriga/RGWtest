@@ -29,7 +29,7 @@ numCONT=5
 numOBJ=500                # for delWRITE in BAGL
 # highest object range for WRITE and DELETE operations
 #numOBJmax=$(( (numOBJ * 10) ))  # multiply by ten for growing Object Count
-numOBJmax=$numOBJ                # multiply by ten for steady-state Object Count
+numOBJmax=$numOBJ                # for steady-state Object Count
 
 #########
 # DELWRITE workload specific variables
