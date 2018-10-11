@@ -9,14 +9,14 @@ pollinterval="1m"            # poll.sh interval to gather statistics
 # WARNING: if you change these you need to re-run 'writeXML.sh'
 # KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
 #
-runtime_sec="180"                 # Runtime (in sec)  
+runtime_sec="180"                 # Runtime (in sec) so 180s == 3min 
 rgwUSER="johndoe:swift"           # username
 #rgwURL="172.16.0.131:5000"       # auth_url connection point
 rgwURL="localhost:5000"		      # each client will run its own haproxy
-#fillWORKERS=72         # number of workers to use for filling the Cluster
-fillWORKERS=15         # number of workers to use for filling the Cluster
-#runtestWORKERS=192     # number of workers for running IOWorkload
-runtestWORKERS=15      # number of workers for running IOWorkload
+fillWORKERS=80         # number of workers to use for filling the Cluster (w/10 Cleints)
+#fillWORKERS=40        # number of workers to use for filling the Cluster (ie. 5 Clients)
+#runtestWORKERS=40     # number of workers for running IOWorkload (ie. 5 Clients)
+runtestWORKERS=80      # number of workers for running IOWorkload (w/10 Clients)
 #
 # Object sizes
 #objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
@@ -96,8 +96,8 @@ declare -a FILLvalues_arr=("swift"               # storage type
 #
 # Next up - RUNTEST settings
 # This COSbench workload is initiated by the runIOworkload.sh script
-#RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
-RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
+RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
+#RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
 RUNTESTxml="ioWorkload.xml"
 # runtest: pre-existing keys in the RUNTESTtemplate file
 declare -a RTkeys_arr=("RUNTESTstorage_type"
@@ -178,8 +178,8 @@ fi
 # runIOworkload.sh vars
 
 # Ceph cluster node hostnames/IP addresses
-MONhostname="gprfc037"
-RGWhostname="smerf02"
+MONhostname="c05-h33-6018r"
+RGWhostname="c07-h01-6048r"
 
 # COSbench vars
 #cosPATH="/root/0.4.2.c4"
