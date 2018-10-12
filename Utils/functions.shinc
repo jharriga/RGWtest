@@ -59,11 +59,23 @@ function get_rawUsed() {
 }
 
 function get_pendingGC() {
-  pendingGC=`radosgw-admin gc list --include-all | wc -l`
+  # get this stat when running RHCS 3.x builds
+  if echo $CEPH_VERSION | grep -q "10.2." ; then
+      # Skip get_pendingGC for 2.5 versions
+      pendingGC="N/A"
+  else
+      pendingGC=`radosgw-admin gc list --include-all | wc -l`
+  fi
 }
 
 function get_pendingRESHARD() {
-  pendingRESHARD=`radosgw-admin reshard list --include-all | wc -l`
+  # get this stat when running RHCS 3.x builds
+  if echo $CEPH_VERSION | grep -q "10.2." ; then
+      # Skip get_pendingRESHARD for 2.5 versions
+      pendingRESHARD="N/A"
+  else
+      pendingRESHARD=`radosgw-admin reshard list --include-all | wc -l`
+  fi
 }
 
 function get_upTime() {
