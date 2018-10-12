@@ -38,7 +38,8 @@ updatelog "%RAW USED ${rawUsed}; Pending GCs ${pendingGC}" $log
 threshold="75.0"
 
 # keep polling until cluster reaches 'threshold' % fill mark
-while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
+#while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
+while (( $(echo "${rawUsed} < ${threshold}" | bc -l) )); do
     # RESHARD activity
     echo -n "RESHARD: " >> $log
     get_pendingRESHARD
