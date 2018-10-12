@@ -20,31 +20,45 @@ fi
 touch $LOGFILE || error_exit "$LINENO: Unable to create LOGFILE."
 updatelog "${PROGNAME} - Created logfile: $LOGFILE" $LOGFILE
 
-# Record STARTING cluster capacity snd GC tats
+# Record STARTING cluster capacity and GC stats
 var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
 # Record GC stats
-var3=`radosgw-admin gc list --include-all | wc -l`
-updatelog "Pending GC's == $var3" $LOGFILE
-########## Alternate stats method
-#rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
-#pendingGC=`radosgw-admin gc list --include-all | wc -l`
-#echo "Starting statistics:"
-#echo "   %RAW USED ${rawUsed} : Pending GCs ${pendingGC}" 
-#date
+get_pendingGC
+echo -n "GC: " >> $LOGFILE
+updatelog "Pending GC's == $pendingGC" $LOGFILE
+
+updatelog "START: poll backgrd process" $LOGFILE
+# Poll ceph statistics (in a bkrgd process) 
+Utils/poll.sh "${pollinterval}" "${LOGFILE}" &
+PIDpoll=$!
+# VERIFY it successfully started
+sleep 2
+if ! ps -p $PIDpoll > /dev/null; then
+    error_exit "poll.sh FAILED. Exiting"
+fi
+updatelog "POLL backgrd processID $PIDpoll" $LOGFILE
+
 ##########
 # Run the COSbench workload to fill the cluster
-updatelog "START: cosbench launched" $LOGFILE
+updatelog "START: cosbench ${FILLxml} launched" $LOGFILE
 ./Utils/cos.sh ${myPath}/${FILLxml} $LOGFILE
+
+updatelog "END: cosbench done" $LOGFILE
+
+# Now kill off the POLL background process
+kill $PIDpoll; kill $PIDpoll
+updatelog "Stopped POLL bkgrd process" $LOGFILE
 
 # Record ENDING cluster capacity and GC stats
 var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
 # Record GC stats
-var3=`radosgw-admin gc list --include-all | wc -l`
-updatelog "Pending GC's == $var3" $LOGFILE
+get_pendingGC
+echo -n "GC: " >> $LOGFILE
+updatelog "Pending GC's == $pendingGC" $LOGFILE
 
 updatelog "$PROGNAME: Done" $LOGFILE
 
