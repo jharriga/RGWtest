@@ -35,7 +35,7 @@ get_rawUsed
 get_pendingGC
 echo -n "GC: " >> $log   # prefix line with GC label for parsing
 updatelog "%RAW USED ${rawUsed}; Pending GCs ${pendingGC}" $log
-threshold="75.0"
+threshold="80.0"
 
 # keep polling until cluster reaches 'threshold' % fill mark
 #while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
