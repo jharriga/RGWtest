@@ -31,8 +31,8 @@ function create_pools {
       cmdtail="replicated"
   elif [ "$1" == "ec" ]; then
 #      cmdtail="erasure myprofile"
-# pre-create for 50 Million objects
-      cmdtail="erasure myprofile default.rgw.buckets.data 50000000"
+# pre-create for 500 Million objects
+      cmdtail="erasure myprofile default.rgw.buckets.data 500000000"
       ceph osd erasure-code-profile rm myprofile
       ceph osd erasure-code-profile set myprofile k=$k m=$m 
       ceph osd crush rule create-erasure default.rgw.buckets.data myprofile
