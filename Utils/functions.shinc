@@ -87,6 +87,8 @@ function get_rgwStats() {
 }
 
 function get_osdStats() {
+# use ps v and capture %CPU and %MEM in one output, which we can then use to plot graph.
+# $ ps  -eo pid,cmd,args | grep ceph | awk '{print $1}'  | xargs ps v
   osdStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
 }
 
