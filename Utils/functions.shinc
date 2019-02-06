@@ -86,11 +86,133 @@ function get_rgwStats() {
   rgwStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep radosgw`
 }
 
-function get_osdStats() {
+function get_osdMem() {
 # use ps v and capture %CPU and %MEM in one output, which we can then use to plot graph.
 # $ ps  -eo pid,cmd,args | grep ceph | awk '{print $1}'  | xargs ps v
   osdStats=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
 }
+
+function write_Hostscripts() {
+  thecmd=$1
+
+# Remove spaces from $thecmd (part of hostscript file name)
+  no_whitespace="$(echo -e "${thecmd}" | tr -d '[:space:]')"
+# Store each osdHOSTname in an array, for later use
+  mapfile -t osdHOSTS_arr < <( ceph node ls osd | grep -o '".*"' | tr -d '"' )
+
+# Strip domain name from OSD hostnames
+  for i in "${!osdHOSTS_arr[@]}"; do
+      element="${osdHOSTS_arr[$i]}"
+      osdHOSTS_arr[$i]="${element/.*/}"
+  done
+
+# Create new Hostscript files, one for each OSD host
+  for h1 in "${osdHOSTS_arr[@]}"; do
+      s1="/tmp/${h1}_${no_whitespace}"
+      if [ -e $s1 ]; then
+       rm -f $s1 || error_exit "${FUNCNAME}: Unable to remove $s1."
+      fi
+      > $s1 || error_exit "${FUNCNAME}: Unable to create $s1"
+      echo "rm -f /tmp/osdstats" >> $s1
+      echo "echo $s1 'BEGIN: ' $(date) >> /tmp/osdstats" >> $s1
+  done
+
+# Write out the scriptfiles to be executed on each of the OSDs
+#   this loop takes a while... (ceph osd find is SLOW)
+  for osdNUM in $(ceph osd tree | awk '/up/ {print $1}'); do
+      host=$(ceph osd find $osdNUM |awk -F\" '$2 ~ /host/ {print $4}')
+      hs="/tmp/${host}_${no_whitespace}"
+      echo "echo >> /tmp/osdstats" >> $hs
+      echo "echo osd.${osdNUM} >> /tmp/osdstats" >> $hs
+      echo "ceph daemon osd.${osdNUM} ${thecmd} >> /tmp/osdstats" >> $hs
+  done
+
+# Close up the scriptfiles
+  for h2 in "${osdHOSTS_arr[@]}"; do
+      s2="/tmp/${h2}_${no_whitespace}"
+      echo "echo >> /tmp/osdstats" >> $s2
+      echo "echo $s2 'DONE: ' $(date) >> /tmp/osdstats" >> $s2
+  done
+# END write_Hostscripts
+}
+
+function get_OSDstats() {
+  statcmd=$1
+  logdir=$2
+  logfn=$3
+# Create logdir
+  if [ ! -d $logdir ]; then
+      mkdir -p $logdir || \
+        error_exit "${FUNCNAME}: Unable to create $logdir."
+  fi
+  tstamp="$(date +%Y%m%d-%H%M%S)"
+# Store each osdHOSTname in an array, for later use
+  mapfile -t osdHOSTS_arr < <( ceph node ls osd | grep -o '".*"' | tr -d '"' )
+
+# Strip domain name from OSD hostnames
+  for i in "${!osdHOSTS_arr[@]}"; do
+      element="${osdHOSTS_arr[$i]}"
+      osdHOSTS_arr[$i]="${element/.*/}"
+  done
+
+# Create the (empty) logfiles and log timestamp
+#   one for each host
+  for h1 in "${osdHOSTS_arr[@]}"; do
+##      f1="$logdir/$h1"
+      f1="$logdir/${tstamp}_${h1}"
+      > $f1 || error_exit "${FUNCNAME}: Unable to create $f1"
+  done
+  updatelog "${PROGNAME}:${FUNCNAME} - Created logfiles: $logdir" $logfn
+
+# Depending on $statcmd, get the requested statistics
+#
+# meminfo is only performed once per osdHOST
+  if [ "$statcmd" == "meminfo" ]; then
+      for h2 in "${osdHOSTS_arr[@]}"; do
+          f2="$logdir/${tstamp}_${h2}"
+##          f2="$logdir/$h2"
+          ssh $h2 cat /proc/meminfo >> $f2 &
+      done
+      wait         # wait for backgrd jobs to complete
+      for h3 in "${osdHOSTS_arr[@]}"; do
+        f3="$logdir/$h3"
+##        updatelog "${PROGNAME}:${FUNCNAME} - Closed: $f3" $f3
+      done
+      updatelog "${PROGNAME}:${FUNCNAME} - Closed logfiles: $logdir" $logfn
+  else
+#
+# All other statcmd's are performed once per osdNUM
+# To shorten execution time, scriptfiles which were already written by
+#   function write_Hostscripts are run in parallel
+# remove spaces from $statcmd (used as hostscript file name)
+    no_whitespace="$(echo -e "${statcmd}" | tr -d '[:space:]')"
+#
+# Execute the hostscripts (in parallel) on each of the OSD systems
+# then copy the logs back from each of the OSD systems
+# and append contents to each of the local logfiles
+    for h3 in "${osdHOSTS_arr[@]}"; do
+        hs="/tmp/${h3}_${no_whitespace}"
+        if [ ! -f $hs ]; then
+          error_exit "$LINENO: Hostscript not found : $hs"
+        fi
+        ssh "root@${h3}" "bash -s" < "$hs" &
+    done
+    wait         # wait for backgrd jobs to complete
+
+# Now copy the logs back from each of the OSD systems
+    for h4 in "${osdHOSTS_arr[@]}"; do
+##        f4="$logdir/$h4"
+        f4="$logdir/${tstamp}_${h4}"
+        scp -q "root@${h4}:/tmp/osdstats" /tmp/osdstats
+        cat /tmp/osdstats >> $f4
+        rm -f /tmp/osdstats /tmp/$h4
+##        updatelog "${PROGNAME}:${FUNCNAME} - SCPd and appended: $f4" $f4
+    done
+    updatelog "${PROGNAME}:${FUNCNAME} - SCPd logfiles: $logdir" $logfn
+  fi
+# END get_OSDstats
+}
+
 
 #
 #
