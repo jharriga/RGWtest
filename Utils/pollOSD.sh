@@ -53,13 +53,13 @@ while (( $(echo "${rawUsed} < ${threshold}" | bc -l) )); do
 
     # RGW radosgw PROCESS and MEM stats
     echo -n "RGW: " >> $log        # prefix line with stats label`
-    get_rgwStats
-    updatelog "${RGWhostname} ${rgwStats}" $log
+    get_rgwMem
+    updatelog "${RGWhostname} ${rgwMem}" $log
 
     # ceph-osd PROCESS and MEM stats
     echo -n "OSD: " >> $log        # prefix line with stats label
-    get_osdStats
-    updatelog "${RGWhostname} ${osdStats}" $log
+    get_osdMem
+    updatelog "${RGWhostname} ${osdMem}" $log
 
     # insert polling seperator line
     updatelog "++++++++++++SLEEPING ${interval}++++++++++++++++++++++" $log
