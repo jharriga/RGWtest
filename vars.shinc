@@ -10,6 +10,7 @@ CEPH_VERSION=`ceph --version`  # determines what stats poll.sh records
 # WARNING: if you change these you need to re-run 'writeXML.sh'
 # KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
 #
+# NOTE: runtime_sec is ignored for fillWorkload.xml jobs
 runtime_sec="3600"                 # 1hr Runtime (in sec)  
 #runtime_sec="21600"               # 6hr Runtime (in sec)  
 #runtime_sec="86400"               # 24hr Runtime (in sec)  
