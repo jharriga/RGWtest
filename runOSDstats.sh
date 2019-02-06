@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# runOSD.sh
+# runOSDstats.sh
 #   executes COSbench jobfile (arg1)
 #   polls ceph stats incl. OSD (see Utils/pollOSD.sh)
 #   NOTE: does not poll for garbage collection stats (see 
@@ -20,8 +20,8 @@ source "$myPath/vars.shinc"
 source "$myPath/Utils/functions.shinc"
 
 # Parse cmdline args - we need ONE, the COSbench workload file
-[ $# -ne 1 ] && error_exit "runOSD.sh failed - wrong number of args"
-[ -z "$1" ] && error_exit "runOSD.sh failed - empty first arg"
+[ $# -ne 1 ] && error_exit "runOSDstats.sh failed - wrong number of args"
+[ -z "$1" ] && error_exit "runOSDstats.sh failed - empty first arg"
 
 jobfile=$1
 if [ ! -f $jobfile ]; then
