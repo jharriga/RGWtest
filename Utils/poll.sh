@@ -35,7 +35,7 @@ get_rawUsed
 get_pendingGC
 echo -n "GC: " >> $log   # prefix line with GC label for parsing
 updatelog "%RAW USED ${rawUsed}; Pending GCs ${pendingGC}" $log
-threshold="80.0"
+threshold="85.0"
 
 # keep polling until cluster reaches 'threshold' % fill mark
 #while (( $(awk 'BEGIN {print ("'$rawUsed'" < "'$threshold'")}') )); do
@@ -52,13 +52,13 @@ while (( $(echo "${rawUsed} < ${threshold}" | bc -l) )); do
 
     # RGW radosgw PROCESS and MEM stats
     echo -n "RGW: " >> $log        # prefix line with stats label`
-    get_rgwStats
-    updatelog "${RGWhostname} ${rgwStats}" $log
+    get_rgwMem
+    updatelog "${RGWhostname} ${rgwMem}" $log
 
     # ceph-osd PROCESS and MEM stats
     echo -n "OSD: " >> $log        # prefix line with stats label
-    get_osdStats
-    updatelog "${RGWhostname} ${osdStats}" $log
+    get_osdMem
+    updatelog "${RGWhostname} ${osdMem}" $log
 
     # Sleep for the poll interval
     sleep "${interval}"
@@ -72,7 +72,7 @@ while (( $(echo "${rawUsed} < ${threshold}" | bc -l) )); do
 done
 
 echo -n "POLL.sh: " >> $log   # prefix line with label for parsing
-updatelog "** 75% fill mark hit: POLL ending" $log
+updatelog "** 85% fill mark hit: POLL ending" $log
 
 #echo " " | mail -s "POLL fill mark hit - terminated" user@company.net
 
