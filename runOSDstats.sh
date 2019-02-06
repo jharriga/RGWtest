@@ -23,7 +23,7 @@ source "$myPath/Utils/functions.shinc"
 [ $# -ne 1 ] && error_exit "runOSDstats.sh failed - wrong number of args"
 [ -z "$1" ] && error_exit "runOSDstats.sh failed - empty first arg"
 
-jobfile=$1
+jobfile="$(realpath $1)"
 if [ ! -f $jobfile ]; then
     error_exit "$LINENO: Unable to open jobfile: $jobfile."
 fi
@@ -75,9 +75,9 @@ updatelog "START: cosbench launched" $LOGFILE
 
 # Start the COSbench I/O workload
 # cos.sh passes $jobId back via $TMPfile - used as prefix for $LOGFILE
-##./Utils/cos.sh ${myPath}/${jobfile} $LOGFILE 
-echo "sleeping 300s"
-sleep 300
+./Utils/cos.sh $jobfile $LOGFILE 
+#echo "sleeping 300s"    # DEBUG
+#sleep 300               # DEBUG
 
 updatelog "END: cosbench done" $LOGFILE
 
@@ -106,8 +106,7 @@ updatelog "Pending GC's == $pendingGC" $LOGFILE
 # Rename LOGFILE (vars.shinc)
 # prepend w/$jobId from cos.sh script (sent via $TMPfile)
 updatelog "Renaming LOGFILE with COSbench jobId prefix" $LOGFILE
-##jobId=$(cat "${TMPfile}")
-jobId="w8"
+jobId=$(cat "${TMPfile}")
 echo "JOBID: ${jobId}"
 LOGFINAL="${RESULTSDIR}/${jobId}_${PROGNAME}_${ts}.log"
 echo "LOGFINAL: ${LOGFINAL}"
