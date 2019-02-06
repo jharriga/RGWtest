@@ -3,7 +3,7 @@ scripts to investigate RGW performance and log statistics (garbage collection
 rates; radosgw and ceph-osd process stats; as well as "ceph daemon osd" probes)
 
 Uses COSbench to issue RGW operations.
-All scripts create timestamped logfiles in RESULTS directory
+All scripts create timestamped logfiles in RESULTS directory, named with COSbench jobId.
 
 # Inventory of scripts:
 - writeXML.sh       writes the COSbench XML workload files from the Templates (found in 'XMLtemplates' dir)
