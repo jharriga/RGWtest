@@ -1,5 +1,5 @@
 #!/bin/bash
-# RESETRGW.shPRECREATE    - this requires RHCS 3.1 and later
+# RESETRGWprecreate.sh    - this requires RHCS 3.1 and later
 # adds use of expected_num_objects to pool create (line 32)
 # this avoids filestore merge activity while the workloads are active
 
