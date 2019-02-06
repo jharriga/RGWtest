@@ -75,7 +75,7 @@ updatelog "START: cosbench launched" $LOGFILE
 
 # Start the COSbench I/O workload
 # cos.sh passes $jobId back via $TMPfile - used as prefix for $LOGFILE
-##./Utils/cos.sh ${myPath}/${RUNTESTxml} $LOGFILE 
+##./Utils/cos.sh ${myPath}/${jobfile} $LOGFILE 
 echo "sleeping 300s"
 sleep 300
 
