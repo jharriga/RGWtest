@@ -10,14 +10,18 @@ CEPH_VERSION=`ceph --version`  # determines what stats poll.sh records
 # WARNING: if you change these you need to re-run 'writeXML.sh'
 # KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
 #
-runtime_sec="180"                 # Runtime (in sec) so 180s == 3min 
+runtime_sec="3600"                 # 1hr Runtime (in sec)  
+#runtime_sec="21600"               # 6hr Runtime (in sec)  
+#runtime_sec="86400"               # 24hr Runtime (in sec)  
+#runtime_sec="172800"              # 48hr Runtime (in sec)  
 rgwUSER="johndoe:swift"           # username
 #rgwURL="172.16.0.131:5000"       # auth_url connection point
 rgwURL="localhost:5000"		      # each client will run its own haproxy
-fillWORKERS=80         # number of workers to use for filling the Cluster (w/10 Cleints)
-#fillWORKERS=40        # number of workers to use for filling the Cluster (ie. 5 Clients)
-#runtestWORKERS=40     # number of workers for running IOWorkload (ie. 5 Clients)
-runtestWORKERS=80      # number of workers for running IOWorkload (w/10 Clients)
+#fillWORKERS=80         # number of workers to use for filling the Cluster (w/10 Clients)
+#runtestWORKERS=80      # number of workers for running IOWorkload (w/10 Clients)
+fillWORKERS=40        # LTA number of workers to use for filling the Cluster (ie. 5 Clients)
+runtestWORKERS=40     # LTA number of workers for running IOWorkload (ie. 5 Clients)
+
 #
 # Object sizes
 #objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
@@ -27,10 +31,10 @@ objSIZES="h(1|1|50,64|64|15,8192|8192|15,65536|65536|15,1048576|1048576|5)KB"
 numCONT=5
 #numOBJ=22000              # e.g. for 25% fill
 #numOBJ=43397              # e.g. for 50% fill
-numOBJ=500                # for delWRITE in BAGL
+numOBJ=232000              # for 30% fill in LTA w/24 HDDs
 # highest object range for WRITE and DELETE operations
-#numOBJmax=$(( (numOBJ * 2) ))  # multiply by two for growing Object Count
-numOBJmax=$numOBJ                # for steady-state Object Count
+#numOBJmax=$(( (numOBJ * 2) ))  # multiply by two for AGING runs
+numOBJmax=$numOBJ                # for HYBRID steady-state Object Count
 
 #########
 # DELWRITE workload specific variables
@@ -199,6 +203,9 @@ LOGFILE="${RESULTSDIR}/${PROGNAME}_${ts}.log"
 # Logfile date format, customize it to your wishes
 #   - see man date for help
 DATE='date +%Y/%m/%d:%H:%M:%S'
+
+# Temp dir for holding OSD stats
+TMPdir="$RESULTSDIR/TMPDIR${PROGNAME}_${ts}"
 
 # END GLOBAL VARIABLES
 #--------------------------------------------------------------------
