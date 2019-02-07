@@ -36,6 +36,11 @@ fi
 > $LOGFILE || error_exit "$LINENO: Unable to create LOGFILE."
 updatelog "${PROGNAME} - Created logfile: $LOGFILE" $LOGFILE
 
+# Add $jobfile contents to LOGFILE
+updatelog "BEGIN ${jobfile} contents:" $LOGFILE
+cat $jobfile >> $LOGFILE
+updatelog "END ${jobfile}" $LOGFILE
+
 # Record STARTING cluster capacity stats
 var1=`echo; ceph df | head -n 5`
 var2=`echo; ceph df | grep rgw.buckets.data`
