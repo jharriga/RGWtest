@@ -3,6 +3,9 @@
 # runOSDstats.sh
 #   executes COSbench jobfile (arg1)
 #   polls ceph stats incl. OSD (see Utils/pollOSD.sh)
+#   NOTE: only works for runmode=baremetal
+#         does not support runmode=containerized
+#
 #   NOTE: does not poll for garbage collection stats (see 
 #         runIOworkload.sh and Utils/poll.sh for that
 #####################################################################
