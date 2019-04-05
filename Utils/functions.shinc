@@ -15,7 +15,8 @@ function print_Runtime {
   if [ -f /etc/redhat-release ]; then
     echo -n "> "; cat /etc/redhat-release | tee -a $logfile
   fi
-  echo -n "> "; ceph --version | tee -a $logfile
+  echo -n "> "; $execMON ceph --version | tee -a $logfile
+  echo -n "> "; runmode=$runmode | tee -a $logfile
 
 # Write key variable values to LOGFILE
   echo "Key Variable Values:" | tee -a $logfile
@@ -55,7 +56,7 @@ function get_time() {
 # collection of 'get_' routines used by POLL.sh
 function get_rawUsed() {
 # NOTE: this may need to be $7 rather than $4 <<<<<<<<
-  rawUsed=`ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
+  rawUsed=`$execMON ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
 }
 
 function get_pendingGC() {
@@ -64,7 +65,7 @@ function get_pendingGC() {
       # Skip get_pendingGC for 2.5 versions
       pendingGC="N/A"
   else
-      pendingGC=`radosgw-admin gc list --include-all | wc -l`
+      pendingGC=`$execRGW radosgw-admin gc list --include-all | wc -l`
   fi
 }
 
@@ -74,7 +75,7 @@ function get_pendingRESHARD() {
       # Skip get_pendingRESHARD for 2.5 versions
       pendingRESHARD="N/A"
   else
-      pendingRESHARD=`radosgw-admin reshard list --include-all | wc -l`
+      pendingRESHARD=`$execRGW radosgw-admin reshard list --include-all | wc -l`
   fi
 }
 
@@ -83,17 +84,21 @@ function get_upTime() {
 }
 
 function get_rgwMem() {
-  rgwMem=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep radosgw`
+  rgwMem=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep -w 'radosgw '`
 }
 
 function get_osdMem() {
 # use ps v and capture %CPU and %MEM in one output, which we can then use to plot graph.
 # $ ps  -eo pid,cmd,args | grep ceph | awk '{print $1}'  | xargs ps v
-  osdMem=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep ceph-osd`
+  osdMem=`ssh $RGWhostname ps -eo comm,pcpu,pmem,vsz,rss | grep -w 'ceph-osd '`
 }
 
 function write_Hostscripts() {
   thecmd=$1
+
+  if [ $runmode == "containerized" ]; then
+     error_exit “${FUNCNAME}: does not support runmode=containerized”
+  fi
 
 # Remove spaces from $thecmd (part of hostscript file name)
   no_whitespace="$(echo -e "${thecmd}" | tr -d '[:space:]')"
@@ -140,6 +145,10 @@ function get_OSDstats() {
   statcmd=$1
   logdir=$2
   logfn=$3
+
+  if [ $runmode == "containerized" ]; then
+     error_exit “${FUNCNAME}: does not support runmode=containerized”
+  fi
 # Create logdir
   if [ ! -d $logdir ]; then
       mkdir -p $logdir || \
