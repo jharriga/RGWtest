@@ -43,7 +43,7 @@ updatelog "END ${jobfile}" $LOGFILE
 
 # log start Cgroup CPU number throttled (if containerized)
 if [ $runmode == "containerized" ]; then
-    nt_start=$(ssh root@RGWhostname < Utils/thr_time.sh)
+    nt_start=$(ssh $RGWhostname 'bash -s' < Utils/thr_time.sh)
     updatelog "$nt_start" $LOGFILE
 fi
 
@@ -86,7 +86,7 @@ updatelog "$var1$var2" $LOGFILE
 
 # log end Cgroup CPU number throttled (if containerized)
 if [ $runmode == "containerized" ]; then
-    nt_end=$(ssh root@RGWhostname < Utils/thr_time.sh)
+    nt_end=$(ssh $RGWhostname 'bash -s' < Utils/thr_time.sh)
     updatelog "$nt_end" $LOGFILE
 fi
 
