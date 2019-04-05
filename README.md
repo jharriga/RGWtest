@@ -1,33 +1,53 @@
 # RGWtest
-scripts to investigate RGW performance and log statistics (garbage collection
+Scripts to investigate RGW performance and log statistics (garbage collection
 rates; radosgw and ceph-osd process stats; as well as "ceph daemon osd" probes)
+Detects "runmode", either bare-metal or containerized and prepends ceph cmd calls
+appropriately.
 
-Uses COSbench to issue RGW operations.
-All scripts create timestamped logfiles in RESULTS directory, named with COSbench jobId.
+Uses COSbench to issue RGW workloads/operations. https://github.com/intel-cloud/cosbench
+Scripts create timestamped logfiles in $RESULTS directory, named with prepended COSbench jobId.
 
 # Inventory of scripts:
 - writeXML.sh       writes the COSbench XML workload files from the Templates (found in 'XMLtemplates' dir)
 - resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Inserts passwd into XML files
-- resetRGWbi.sh     variant of 'resetRGW.sh' which uses SSD based bucket indexes
-- resetRGWprecreate.sh   variant specific to Filestore. Precreates directories for improved perf.
-- emptyCluster.sh   invokes emptyWorkload.xml (runs cleanup and dispose operations)
-- fillCluster.sh    invokes fillWorkload.xml (fills the cluster with numOBJ and OBJsizes as spec'd in vars.shinc)
+- resetRGWbi.sh     variant of 'resetRGW.sh' which uses SSD based bucket indexes (NOTE: does not support runmode=containerized)
+- resetRGWprecreate.sh   variant specific to Filestore. Precreates XFS directories for improved workload performance (NOTE: does not support runmode=containerized)
 - runIOworkload.sh  invokes ioWorkload.xml (main test script. Executes IOworkload and logs results in RESULTS dir)
-- runOSDstats.sh    variant of runIOworkload.sh which polls OSDs for deeper stats gathering
+- runOSDstats.sh    variant of runIOworkload.sh which polls OSDs for deeper stats gathering (NOTE: does not support runmode=containerized)
 - copyPasswd.sh     inserts the RGW password into the COSbench XML workload files
-- Utils/poll.sh     called by runIOworkload.sh to periodically log statistics (garbage collection, loadAvg, ps)
 
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
 
 # RUN PROCEDURE:
-  - edit vars.shinc
+  - Edit vars.shinc   MUST BE EDITED (see below)
   - writeXML.sh        <-- afterwards you must run either 'resetRGW.sh' or 'copyPasswd.sh'
   - resetRGW.sh        <- or use one of the two other variants (resetRGWbi.sh; resetRGWprecreate.sh)
-  - fillCluster.sh     <-- or use 'runOSDstats.sh' for additional statistics gathering
-  - runIOworkload.sh
-  - emptyCluster.sh
+  - runIOworkload.sh fillWorkload.xml
+  - runIOworkload ioWorkload.xml
 
-# Calculating the number of objects to use
+# Variables, Utilities and Functions
+- vars.shinc: runtime variables for scripts (MUST BE EDITED)
+- copyPasswd.sh: inserts the RGW user auth password into the COSbench XML workload files
+- Utils/functionshinc: collection of functions called within scripts
+- Utils/poll.sh: called by runIOworkload.sh to periodically log statistics (garbage collection, loadAvg, ps...)
+- Utils/thr_time.sh: called by resetRGW.sh and runIOworkload.sh to log Cgroup throttled time (only called in containerized env)
+
+# Edits to vars.shinc
+All users will need to make edits to this file prior to executing any of the scripts.
+The file is extensively commented to help guide the user.
+Commonly required edits include these variables:
+- MONhostname
+- RGWhostname
+- objSIZES
+- numOBJ
+- numCONT
+- preparePTYPE
+- pg_data
+- pg_index
+- pg
+- cosPATH
+
+# Calculating the number of objects (numOBJ) to use
 Based on a cluster with these parameters:
 - 174TB of raw capacity
 - 10 buckets/containers
@@ -39,7 +59,7 @@ the following object count (per container) produces the following fill levels:
 
 Those values were calculated using this formula:
 - Raw Capacity of 174TB / 3 = 58TB  (factor in 3way repl)
-- 58TB / 10 = 5.8TB   (factor in 10 containers)
+- 58TB / 10 = 5.8TB   (factor in 10 containers : numCONT)
 - 5.8TB / 1MB = 5.8M object count capacity per container
 - 25% of 5.8M is 1.45M objects per container
 - 50% of 5.8M is 2.9M objects per container
