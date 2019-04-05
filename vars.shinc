@@ -2,8 +2,11 @@
 # START GLOBAL VARIABLES
 #
 
+# Ceph cluster node hostnames/IP addresses
+MONhostname="pcloud10"
+RGWhostname="pcloud08"
+
 pollinterval="1m"              # poll.sh interval to gather statistics
-CEPH_VERSION=`ceph --version`  # determines what stats poll.sh records
 
 #----------------------------------------------------------------------
 # Runtimes for various COSbench workstages
@@ -25,14 +28,16 @@ runtestWORKERS=40     # LTA number of workers for running IOWorkload (ie. 5 Clie
 
 #
 # Object sizes
+#objSIZES="c(64)KB"
 #objSIZES="h(4|4|34,64|64|33,65536|65536|33)KB"
 objSIZES="h(1|1|50,64|64|15,8192|8192|15,65536|65536|15,1048576|1048576|5)KB"
-#
+
+# Determine cluster fill capacity
 # Number of Containers and Objects
 numCONT=5
 #numOBJ=22000              # e.g. for 25% fill
 #numOBJ=43397              # e.g. for 50% fill
-numOBJ=232000              # for 30% fill in LTA w/24 HDDs
+numOBJ=232000              # for 30% fill in LTA w/24 HDDs (7x OSD nodes)
 # highest object range for WRITE and DELETE operations
 #numOBJmax=$(( (numOBJ * 2) ))  # multiply by two for AGING runs
 numOBJmax=$numOBJ                # for HYBRID steady-state Object Count
@@ -183,10 +188,6 @@ fi
 #------------------------
 # runIOworkload.sh vars
 
-# Ceph cluster node hostnames/IP addresses
-MONhostname="c05-h33-6018r"
-RGWhostname="c07-h01-6048r"
-
 # COSbench vars
 #cosPATH="/root/0.4.2.c4"
 cosPATH="/root/v0.4.2"
@@ -207,6 +208,30 @@ DATE='date +%Y/%m/%d:%H:%M:%S'
 
 # Temp dir for holding OSD stats
 TMPdir="$RESULTSDIR/TMPDIR${PROGNAME}_${ts}"
+
+#------------------------
+# Determine runmode: either bare-metal or containerized
+#   defines values for execMON, execRGW and runmode global vars
+#   all Ceph cmds (ceph, radsogw-admin) are prefix'd with execMON or execRGW
+runmode="invalid"
+ret=$(ssh $MONhostname docker exec ceph-mon-$MONhostname ceph health detail)
+if [ $ret == "HEALTH_OK" ] ; then
+    execMON="ssh $MONhostname docker exec ceph-mon-$MONhostname  "
+    execRGW="ssh $RGWhostname docker exec ceph-rgw-$RGWhostname "
+    runmode="containerized"
+elif [ $(ssh $MONhostname ceph health detail) == "HEALTH_OK" ] ; then
+    execMON="ssh $MONhostname "
+    execRGW="ssh $RGWhostname "
+    runmode="baremetal"
+fi
+echo "runmode is $runmode"
+if [ $runmode == "invalid" ]; then
+    echo "vars.shinc: unable to determine runmode(bare-metal or containerized)"
+    echo "Aborting..."
+    exit 2
+fi
+
+CEPH_VERSION=`$execMON ceph --version`  # used in: resetRGW.sh and poll.sh 
 
 # END GLOBAL VARIABLES
 #--------------------------------------------------------------------
