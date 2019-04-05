@@ -21,15 +21,10 @@ function print_Runtime {
 # Write key variable values to LOGFILE
   echo "Key Variable Values:" | tee -a $logfile
   updatelog "> jobtime=${jobtime}" $logfile
-  updatelog "> failuretime=${failuretime}" $logfile
-  updatelog "> recoverytime=${recoverytime}" $logfile
   updatelog "> polltime=${polltime}" $logfile
   echo "Cluster variable settings:" | tee -a $logfile
   updatelog "> OSDnode=${OSDnode}" $logfile
   updatelog "> MONnode=${MONnode}" $logfile
-  echo "COSbench variable settings:" | tee -a $logfile
-  updatelog "> XMLfill=${XMLfill}" $logfile
-  updatelog "> XMLworkload=${XMLworkload}" $logfile
   updatelog "---------------------------------" $logfile
 }
 
