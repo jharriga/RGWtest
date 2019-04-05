@@ -15,6 +15,15 @@ source "$myPath/vars.shinc"
 # Functions
 source "$myPath/Utils/functions.shinc"
 
+# Parse cmdline args - we need ONE, the COSbench workload file
+[ $# -ne 1 ] && error_exit "runContainerized.sh failed - wrong number of args"
+[ -z "$1" ] && error_exit "runContainerized.sh failed - empty first arg"
+
+jobfile="$(realpath $1)"
+if [ ! -f "${jobfile}" ]; then
+    error_exit "$LINENO: Unable to open jobfile: $jobfile."
+fi
+
 # Create log file - named in vars.shinc
 if [ ! -d $RESULTSDIR ]; then
   mkdir -p $RESULTSDIR || \
@@ -23,9 +32,14 @@ fi
 touch $LOGFILE || error_exit "$LINENO: Unable to create LOGFILE."
 updatelog "${PROGNAME} - Created logfile: $LOGFILE" $LOGFILE
 
+# Add $jobfile contents to LOGFILE
+updatelog "BEGIN ${jobfile} contents:" $LOGFILE
+cat $jobfile >> $LOGFILE
+updatelog "END ${jobfile}" $LOGFILE
+
 # Record STARTING cluster capacity stats
-var1=`echo; ceph df | head -n 5`
-var2=`echo; ceph df | grep rgw.buckets.data`
+var1=`echo; $execMON ceph df | head -n 5`
+var2=`echo; $execMON ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
 # Record GC stats
 get_pendingGC
@@ -47,7 +61,7 @@ updatelog "START: cosbench launched" $LOGFILE
 
 # Start the COSbench I/O workload
 # cos.sh passes $jobId back via $TMPfile - used as prefix for $LOGFILE
-./Utils/cos.sh ${myPath}/${RUNTESTxml} $LOGFILE 
+./Utils/cos.sh $jobfile $LOGFILE
 
 updatelog "END: cosbench done" $LOGFILE
 
@@ -56,21 +70,23 @@ kill $PIDpoll; kill $PIDpoll
 updatelog "Stopped POLL bkgrd process" $LOGFILE
 
 # Record ENDING cluster capacity stats
-var1=`echo; ceph df | head -n 5`
-var2=`echo; ceph df | grep rgw.buckets.data`
+var1=`echo; $execMON ceph df | head -n 5`
+var2=`echo; $execMON ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
+
 # Record GC stats
 get_pendingGC
 echo -n "GC: " >> $LOGFILE
 updatelog "Pending GC's == $pendingGC" $LOGFILE
 
-# waits for number of pending GCs to reach 1
-Utils/completedGC.sh "${pollinterval}" "${LOGFILE}"
-
+###################
+# OPTIONAL: waits for number of pending GCs to reach 1
+# Utils/completedGC.sh "${pollinterval}" "${LOGFILE}"
 # Record FINAL cluster capacity stats
-var1=`echo; ceph df | head -n 5`
-var2=`echo; ceph df | grep rgw.buckets.data`
-updatelog "$var1$var2" $LOGFILE
+#var1=`echo; $execMON ceph df | head -n 5`
+#var2=`echo; $execMON ceph df | grep rgw.buckets.data`
+#updatelog "$var1$var2" $LOGFILE
+###################
 
 # Rename LOGFILE (vars.shinc)
 # prepend w/$jobId from cos.sh script (sent via $TMPfile)
