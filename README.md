@@ -30,6 +30,7 @@ NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be 
 - copyPasswd.sh: inserts the RGW user auth password into the COSbench XML workload files
 - Utils/functionshinc: collection of functions called within scripts
 - Utils/poll.sh: called by runIOworkload.sh to periodically log statistics (garbage collection, loadAvg, ps...)
+- Utils/completedGC.sh: optionally called by runIOworkload.sh. Blcoks waiting for all RGW garbage collection activity to complete
 - Utils/thr_time.sh: called by resetRGW.sh and runIOworkload.sh to log Cgroup throttled time (only called in containerized env)
 
 # Edits to vars.shinc
