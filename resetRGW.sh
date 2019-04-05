@@ -68,7 +68,7 @@ echo "RGWhostname=$RGWhostname r=$REPLICATION k=$k m=$m pgdata=$pg_data pgindex=
       pg=$pg f=$fast_read"
 
 echo "runmode=$runmode"
-if [ $runmode == “containerized” ]; then
+if [ $runmode == "containerized" ]; then
     nt_start=$(ssh root@RGWhostname < Utils/thr_time.sh)
     echo $nt_start
 fi
@@ -99,7 +99,7 @@ sed  -i "s/password=.*;/password=$key;/g" ${FILLxml}
 sed  -i "s/password=.*;/password=$key;/g" ${EMPTYxml}
 sed  -i "s/password=.*;/password=$key;/g" ${RUNTESTxml}
 
-if [ $runmode == “containerized” ]; then
+if [ $runmode == "containerized" ]; then
     nt_end=$(ssh root@RGWhostname < Utils/thr_time.sh)
     echo $nt_end
 fi
