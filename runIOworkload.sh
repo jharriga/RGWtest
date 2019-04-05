@@ -33,6 +33,9 @@ fi
 touch $LOGFILE || error_exit "$LINENO: Unable to create LOGFILE."
 updatelog "${PROGNAME} - Created logfile: $LOGFILE" $LOGFILE
 
+# log runtime env settings
+print_Runtime $LOGFILE
+
 # Add $jobfile contents to LOGFILE
 updatelog "BEGIN ${jobfile} contents:" $LOGFILE
 cat $jobfile >> $LOGFILE
