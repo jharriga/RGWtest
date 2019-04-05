@@ -41,6 +41,12 @@ updatelog "BEGIN ${jobfile} contents:" $LOGFILE
 cat $jobfile >> $LOGFILE
 updatelog "END ${jobfile}" $LOGFILE
 
+# log start Cgroup CPU number throttled (if containerized)
+if [ $runmode == "containerized" ]; then
+    nt_start=$(ssh root@RGWhostname < Utils/thr_time.sh)
+    updatelog "$nt_start" $LOGFILE
+fi
+
 # Record STARTING cluster capacity stats
 var1=`echo; $execMON ceph df | head -n 5`
 var2=`echo; $execMON ceph df | grep rgw.buckets.data`
@@ -77,6 +83,12 @@ updatelog "Stopped POLL bkgrd process" $LOGFILE
 var1=`echo; $execMON ceph df | head -n 5`
 var2=`echo; $execMON ceph df | grep rgw.buckets.data`
 updatelog "$var1$var2" $LOGFILE
+
+# log end Cgroup CPU number throttled (if containerized)
+if [ $runmode == "containerized" ]; then
+    nt_end=$(ssh root@RGWhostname < Utils/thr_time.sh)
+    updatelog "$nt_end" $LOGFILE
+fi
 
 # Record GC stats
 get_pendingGC
