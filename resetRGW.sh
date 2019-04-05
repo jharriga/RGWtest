@@ -70,7 +70,7 @@ echo "RGWhostname=$RGWhostname r=$REPLICATION k=$k m=$m pgdata=$pg_data pgindex=
 echo "runmode=$runmode"
 if [ $runmode == "containerized" ]; then
     nt_start=$(ssh $RGWhostname 'bash -s' < Utils/thr_time.sh)
-    echo $nt_start
+    echo -e $nt_start
 fi
 
 echo "Stopping RGWs"
@@ -101,7 +101,7 @@ sed  -i "s/password=.*;/password=$key;/g" ${RUNTESTxml}
 
 if [ $runmode == "containerized" ]; then
     nt_end=$(ssh $RGWhostname 'bash -s' < Utils/thr_time.sh)
-    echo $nt_end
+    echo -e $nt_end
 fi
 
 echo "$PROGNAME: Done"
