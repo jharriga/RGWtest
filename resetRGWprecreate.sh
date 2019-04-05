@@ -2,6 +2,7 @@
 # RESETRGWprecreate.sh    - this requires RHCS 3.1 and later
 # adds use of expected_num_objects to pool create (line 32)
 # this avoids filestore merge activity while the workloads are active
+# not yet adapted to work on runmode==containerized
 
 myPath="${BASH_SOURCE%/*}"
 if [[ ! -d "$myPath" ]]; then
@@ -70,6 +71,11 @@ function create_pools {
 
 # END FUNCTIONS
 #------------------------
+
+# not yet adapted to work on runmode==containerized
+if [ $runmode == "containerized" ]; then
+    error_exit "$LINENO: not yet adapted for runmode=containerized"
+fi
 
 echo "$PROGNAME: Running with these values:"
 echo "RGWhostname=$RGWhostname r=$REPLICATION k=$k m=$m pgdata=$pg_data pgindex=$pg_index \
