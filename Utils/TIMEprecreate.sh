@@ -1,4 +1,5 @@
 #!/bin/sh
+# Test timing for precreate ops
 # script expects that an erasure-code-profile named 'myprofile' exists
 #
 
