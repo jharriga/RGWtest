@@ -1,6 +1,7 @@
 #!/bin/bash
 # resetRGWbi.sh    
 # creates crush rules (incl SSD for bucketindex) as well as pools
+# not yet adapted to work on runmode==containerized
 #
 myPath="${BASH_SOURCE%/*}"
 if [[ ! -d "$myPath" ]]; then
@@ -67,6 +68,11 @@ function create_pools {
 
 # END FUNCTIONS
 #------------------------
+
+# not yet adapted to work on runmode==containerized
+if [ $runmode == "containerized" ]; then
+    error_exit "$LINENO: not yet adapted for runmode=containerized"
+fi
 
 echo "$PROGNAME: Running with these values:"
 echo "RGWhostname=$RGWhostname r=$REPLICATION k=$k m=$m pgdata=$pg_data pgindex=$pg_index \
