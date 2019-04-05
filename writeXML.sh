@@ -71,6 +71,6 @@ done
 echo "> created COSbench workload file: ${RUNTESTxml}"
 
 echo "DONE - Validate XML files before proceeding."
-echo "REMEMBER to insert passwd into XML files by running either:\n    resetRGW.sh -or- copyPasswd.sh"
+echo -e "REMEMBER to insert passwd into XML files by running either:\n    resetRGW.sh -or- copyPasswd.sh"
 
 # DONE
