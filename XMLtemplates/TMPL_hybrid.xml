@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<workload name="hybrid" description="RGW GCrate testing">
+<workload name="hybrid" description="RGW testing">
 
 
 <!-- Initialization -->
