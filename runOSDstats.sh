@@ -22,6 +22,11 @@ source "$myPath/vars.shinc"
 # Functions
 source "$myPath/Utils/functions.shinc"
 
+# not yet adapted to work on runmode==containerized
+if [ $runmode == "containerized" ]; then
+    error_exit "$LINENO: not yet adapted for runmode=containerized"
+fi
+
 # Parse cmdline args - we need ONE, the COSbench workload file
 [ $# -ne 1 ] && error_exit "runOSDstats.sh failed - wrong number of args"
 [ -z "$1" ] && error_exit "runOSDstats.sh failed - empty first arg"
