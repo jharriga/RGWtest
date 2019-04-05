@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# runIOworkload.sh
+# runIOworkload.sh <workload.xml>
+# Requires one argument (COSbench workload.xml file)
 #####################################################################
 
 # Bring in other script files
