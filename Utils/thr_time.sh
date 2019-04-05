@@ -15,7 +15,7 @@ function get_CGROUPstats() {
 
   tt=`grep throttled_time \
      /sys/fs/cgroup/cpu/system.slice/docker-${uuid}.scope/cpu.stat`
-  echo "TYPE: $type - runtime $rt sec - $tt nsec"
+  echo "TYPE: $type - runtime $rt sec - $tt nsec \n"
 }
 
 # get containers IDs
