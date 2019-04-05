@@ -16,15 +16,17 @@ function print_Runtime {
     echo -n "> "; cat /etc/redhat-release | tee -a $logfile
   fi
   echo -n "> "; $execMON ceph --version | tee -a $logfile
-  echo -n "> "; runmode=$runmode | tee -a $logfile
+  
+# write RUNMODE to LOGFILE
+updatelog "> runmode=$runmode" $logfile
 
 # Write key variable values to LOGFILE
   echo "Key Variable Values:" | tee -a $logfile
-  updatelog "> jobtime=${jobtime}" $logfile
-  updatelog "> polltime=${polltime}" $logfile
+  updatelog "> pollinterval=${pollinterval}" $logfile
+  updatelog "> RESULTSDIR=${RESULTSDIR}" $logfile
   echo "Cluster variable settings:" | tee -a $logfile
-  updatelog "> OSDnode=${OSDnode}" $logfile
-  updatelog "> MONnode=${MONnode}" $logfile
+  updatelog "> MONhostname=${MONhostname}" $logfile
+  updatelog "> RGWhostname=${RGWhostname}" $logfile
   updatelog "---------------------------------" $logfile
 }
 
