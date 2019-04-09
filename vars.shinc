@@ -215,21 +215,20 @@ TMPdir="$RESULTSDIR/TMPDIR${PROGNAME}_${ts}"
 #   all Ceph cmds (ceph, radsogw-admin) are prefix'd with execMON or execRGW
 runmode="invalid"
 # First determine if MONhost has 'docker' cmd, then look for ceph-mon container
-if ssh $MONhostname hash docker 2>/dev/null; then
-    if ssh $MONhostname docker ps --filter "name=ceph-mon" 2>/dev/null; then
-        ret=$(ssh $MONhostname docker exec ceph-mon-$MONhostname ceph health detail)
-        if [ $ret == "HEALTH_OK" ] ; then
+if [ $(ssh $MONhostname hash docker 2>/dev/null) ]; then
+    if [ $(ssh $MONhostname docker ps --filter "name=ceph-mon" 2>/dev/null) ]; then
+        if [ $(ssh $MONhostname docker exec ceph-mon-$MONhostname ceph health detail &>/dev/null) ]; then
             execMON="ssh $MONhostname docker exec ceph-mon-$MONhostname  "
             execRGW="ssh $RGWhostname docker exec ceph-rgw-$RGWhostname "
             runmode="containerized"
         fi
     fi
-elif [ $(ssh $MONhostname ceph health detail) == "HEALTH_OK" ] ; then
+elif [ $(ssh $MONhostname ceph health detail &>/dev/null) ] ; then
     execMON="ssh $MONhostname "
     execRGW="ssh $RGWhostname "
     runmode="baremetal"
 fi
-echo "runmode is $runmode"
+#echo "runmode is $runmode"        # DEBUG
 if [ $runmode == "invalid" ]; then
     echo "vars.shinc: unable to determine runmode(bare-metal or containerized)"
     echo "Aborting..."
