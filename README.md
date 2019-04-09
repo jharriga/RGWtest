@@ -21,9 +21,9 @@ NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be 
 # RUN PROCEDURE:
   - Edit vars.shinc   MUST BE EDITED (see below)
   - writeXML.sh        <-- afterwards you must run either 'resetRGW.sh' or 'copyPasswd.sh'
-  - resetRGW.sh        <- or use one of the two other variants (resetRGWbi.sh; resetRGWprecreate.sh)
+  - resetRGW.sh        <-- or use one of the two other variants (resetRGWbi.sh; resetRGWprecreate.sh)
   - runIOworkload.sh fillWorkload.xml
-  - runIOworkload ioWorkload.xml
+  - runIOworkload.sh ioWorkload.xml
 
 # Variables, Utilities and Functions
 - vars.shinc: runtime variables for scripts (MUST BE EDITED)
