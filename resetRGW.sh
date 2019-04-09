@@ -76,6 +76,10 @@ fi
 echo "Stopping RGWs"
 ansible -m shell -a 'systemctl stop ceph-radosgw@rgw.`hostname -s`.service' rgws
 
+# ensure that pool deletion is enabled
+$execMON ceph tell mon.\* injectargs '--mon-allow-pool-delete=true'
+sleep 2
+
 echo "Removing existing/old pools"
 delete_pools
 
