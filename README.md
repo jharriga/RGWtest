@@ -62,5 +62,5 @@ Those values were calculated using this formula:
 - Raw Capacity of 174TB / 3 = 58TB  (factor in 3way repl)
 - 58TB / 10 = 5.8TB   (factor in 10 containers : numCONT)
 - 5.8TB / 1MB = 5.8M object count capacity per container
-- 25% of 5.8M is 1.45M objects per container
-- 50% of 5.8M is 2.9M objects per container
+- 25% of 5.8M is 1.45M objects per container (numOBJ)
+- 50% of 5.8M is 2.9M objects per container (numOBJ)
