@@ -234,7 +234,7 @@ if [ $ret2 -eq 0 ]; then
         fi
     fi
 fi
-echo "runmode is $runmode"        # DEBUG
+#echo "runmode is $runmode"        # DEBUG
 if [ $runmode == "invalid" ]; then
     echo "vars.shinc: unable to determine runmode(bare-metal or containerized)"
     echo "Aborting..."
