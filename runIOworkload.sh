@@ -17,8 +17,8 @@ source "$myPath/vars.shinc"
 source "$myPath/Utils/functions.shinc"
 
 # Parse cmdline args - we need ONE, the COSbench workload file
-[ $# -ne 1 ] && error_exit "runContainerized.sh failed - wrong number of args"
-[ -z "$1" ] && error_exit "runContainerized.sh failed - empty first arg"
+[ $# -ne 1 ] && error_exit "runIOworkload.sh failed - wrong number of args"
+[ -z "$1" ] && error_exit "runIOworkload.sh failed - empty first arg"
 
 jobfile="$(realpath $1)"
 if [ ! -f "${jobfile}" ]; then
