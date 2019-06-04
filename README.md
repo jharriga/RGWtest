@@ -1,8 +1,9 @@
 # RGWtest
-Scripts to investigate RGW performance and log statistics (garbage collection
-rates; radosgw and ceph-osd process stats; as well as "ceph daemon osd" probes)
+Scripts to investigate RGW performance and log statistics
 Detects "runmode", either bare-metal or containerized and prepends ceph cmd calls
 appropriately.
+Requires that passwd-less SSH is configured to designated MON node and RGW node. Also requires
+that ansible be installed on the system.
 
 Uses COSbench to issue RGW workloads/operations. https://github.com/intel-cloud/cosbench
 Scripts create timestamped logfiles in $RESULTS directory, named with prepended COSbench jobId.
@@ -10,10 +11,7 @@ Scripts create timestamped logfiles in $RESULTS directory, named with prepended 
 # Inventory of scripts:
 - writeXML.sh       writes the COSbench XML workload files from the Templates (found in 'XMLtemplates' dir)
 - resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Inserts passwd into XML files
-- resetRGWbi.sh     variant of 'resetRGW.sh' which uses SSD based bucket indexes (NOTE: does not support runmode=containerized)
-- resetRGWprecreate.sh   variant specific to Filestore. Precreates XFS directories for improved workload performance (NOTE: does not support runmode=containerized)
 - runIOworkload.sh  invokes ioWorkload.xml (main test script. Executes IOworkload and logs results in RESULTS dir)
-- runOSDstats.sh    variant of runIOworkload.sh which polls OSDs for deeper stats gathering (NOTE: does not support runmode=containerized)
 - copyPasswd.sh     inserts the RGW password into the COSbench XML workload files
 
 NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
