@@ -52,8 +52,8 @@ function get_time() {
 
 # collection of 'get_' routines used by POLL.sh
 function get_rawUsed() {
-# NOTE: this may need to be $7 rather than $4 <<<<<<<<
-  rawUsed=`$execMON ceph df | head -n 3 | tail -n 1 | awk '{print $4}'`
+# NOTE: verify 'ceph df' fields, this may need to be other than $10
+  rawUsed=`$execMON ceph df | head -n 3 | tail -n 1 | awk '{print $10}'`
 }
 
 function get_pendingGC() {
