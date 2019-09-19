@@ -8,9 +8,8 @@ that ansible be installed on the system.
 
 Uses COSbench to issue RGW workloads/operations. https://github.com/intel-cloud/cosbench
 Scripts create timestamped logfiles in $RESULTS directory, named with prepended COSbench jobId.
-
-**To test S3, use github.com/jharriga/genXMLs to generate workload files - then use 'runIOworkload.sh <workload.xml>'**
 ```
+**To test S3, use github.com/jharriga/genXMLs to generate workload files - then use 'runIOworkload.sh <workload.xml>'**
 
 # Inventory of scripts:
 - writeXML.sh       writes the COSbench XML workload files (swift auth) from the Templates (found in 'XMLtemplates' dir)
