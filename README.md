@@ -1,5 +1,5 @@
 # RGWtest
-Scripts to investigate RGW performance and log statistics
+Scripts to investigate Ceph RGW performance and log statistics
 Detects "runmode", either bare-metal or containerized and prepends ceph cmd calls
 appropriately.
 Requires that passwd-less SSH is configured to designated MON node and RGW node. Also requires
@@ -8,20 +8,21 @@ that ansible be installed on the system.
 Uses COSbench to issue RGW workloads/operations. https://github.com/intel-cloud/cosbench
 Scripts create timestamped logfiles in $RESULTS directory, named with prepended COSbench jobId.
 
-# Inventory of scripts:
-- writeXML.sh       writes the COSbench XML workload files from the Templates (found in 'XMLtemplates' dir)
-- resetRGW.sh       resets the RGW env. Deletes pools and creates new user. Inserts passwd into XML files
-- runIOworkload.sh  invokes ioWorkload.xml (main test script. Executes IOworkload and logs results in RESULTS dir)
-- copyPasswd.sh     inserts the RGW password into the COSbench XML workload files
+# To test S3, use jharriga/genXMLs to generate workload files then use 'runIOworkload.sh <file.xml>'
 
-NOTE: host IPaddresses and ceph login credentials in vars.shinc will need to be replaced for your cluster
+# Inventory of scripts:
+- writeXML.sh       writes the COSbench XML workload files (swift auth) from the Templates (found in 'XMLtemplates' dir)
+- resetRGW.sh       resets the RGW env. Deletes pools and creates new (swift auth) user. Inserts passwd into XML files
+- copyPasswd.sh     inserts the (swift auth) RGW password into the COSbench XML workload files
+- runIOworkload.sh  invokes workload.xml (main test script. Executes workload and logs results in RESULTS dir)
+
+NOTE: host IPaddresses and RGW (sift auth) login credentials in vars.shinc will need to be replaced for your cluster
 
 # RUN PROCEDURE:
   - Edit vars.shinc   MUST BE EDITED (see below)
   - writeXML.sh        <-- afterwards you must run either 'resetRGW.sh' or 'copyPasswd.sh'
-  - resetRGW.sh        <-- or use one of the two other variants (resetRGWbi.sh; resetRGWprecreate.sh)
-  - runIOworkload.sh fillWorkload.xml
-  - runIOworkload.sh ioWorkload.xml
+  - resetRGW.sh        <-- swift auth only. Not used with S3 auth
+  - runIOworkload.sh workload.xml
 
 # Variables, Utilities and Functions
 - vars.shinc: runtime variables for scripts (MUST BE EDITED)
