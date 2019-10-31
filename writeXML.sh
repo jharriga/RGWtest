@@ -33,44 +33,76 @@ for origValue in "${FILLkeys_arr[@]}"; do
     index=$(( $index + 1 ))
 done
 echo "> created COSbench workload file: ${FILLxml}"
-
+#####> COMMENTED - Begin
 # Phase 2: EMPTYxml
 # backup the XML file if it exists
-if [ -f "${EMPTYxml}" ]; then
-    mv "${EMPTYxml}" "${EMPTYxml}_bak"
-    echo "> ${EMPTYxml} exists - moved to ${EMPTYxml}_bak"
-fi
+#if [ -f "${EMPTYxml}" ]; then
+#    mv "${EMPTYxml}" "${EMPTYxml}_bak"
+#    echo "> ${EMPTYxml} exists - moved to ${EMPTYxml}_bak"
+#fi
 # copy the Template and make edits
 # FILLkeys_arr and FILLvalues_arr defined in vars.shinc
-cp "${EMPTYtemplate}" "${EMPTYxml}"
+#cp "${EMPTYtemplate}" "${EMPTYxml}"
+#
+#let index=0
+#for origValue in "${FILLkeys_arr[@]}"; do
+#    newValue="${FILLvalues_arr[index]}"
+#    sed -i "s/${origValue}/${newValue}/g" $EMPTYxml
+#    index=$(( $index + 1 ))
+#done
+#echo "> created COSbench workload file: ${EMPTYxml}"
+######### COMMENTED - End
 
-let index=0
-for origValue in "${FILLkeys_arr[@]}"; do
-    newValue="${FILLvalues_arr[index]}"
-    sed -i "s/${origValue}/${newValue}/g" $EMPTYxml
-    index=$(( $index + 1 ))
-done
-echo "> created COSbench workload file: ${EMPTYxml}"
-
-# Phase 3: RUNTESTxml
+# Phase 2: MEASURExml
 # backup the XML file if it exists
-if [ -f "${RUNTESTxml}" ]; then
-    mv "${RUNTESTxml}" "${RUNTESTxml}_bak"
-    echo "> ${RUNTESTxml} exists - moved to ${RUNTESTxml}_bak"
+if [ -f "${MEASURExml}" ]; then
+    mv "${MEASURExml}" "${MEASURExml}_bak"
+    echo "> ${MEASURExml} exists - moved to ${MEASURExml}_bak"
 fi
 # copy the Template and make edits
-# RTkeys_arr and RTvalues_arr defined in vars.shinc
-cp "${RUNTESTtemplate}" "${RUNTESTxml}"
+# MEASUREkeys_arr and MEASUREvalues_arr defined in vars.shinc
+cp "${MEASUREtemplate}" "${MEASURExml}"
 
 let index=0
-for origValue in "${RTkeys_arr[@]}"; do
-    newValue="${RTvalues_arr[index]}"
-    sed -i "s/${origValue}/${newValue}/g" $RUNTESTxml
+for origValue in "${MEASUREkeys_arr[@]}"; do
+    newValue="${MEASUREvalues_arr[index]}"
+    sed -i "s/${origValue}/${newValue}/g" $MEASURExml
     index=$(( $index + 1 ))
 done
-echo "> created COSbench workload file: ${RUNTESTxml}"
+echo "> created COSbench workload file: ${MEASURExml}"
 
+# Phase 3: AGExml
+# backup the XML file if it exists
+if [ -f "${AGExml}" ]; then
+    mv "${AGExml}" "${AGExml}_bak"
+    echo "> ${AGExml} exists - moved to ${AGExml}_bak"
+fi
+# copy the MEASURExml workload and modify the runtime and maxOBJ
+cp "${MEASURExml}" "${AGExml}"
+sed -i "s/RUNTESTruntime/${AGEruntime}/g" $AGExml
+sed -i "s/RUNTESTmaxOBJ/${AGEmaxOBJ}/g" $AGExml
+echo "> created COSbench workload file: ${AGExml}"
+
+# Phase 4: UPGRADExml
+# backup the XML file if it exists
+if [ -f "${UPGRADExml}" ]; then
+    mv "${UPGRADExml}" "${UPGRADExml}_bak"
+    echo "> ${UPGRADExml} exists - moved to ${UPGRADExml}_bak"
+fi
+# copy the MEASURExml workload and modify the runtime and maxOBJ
+cp "${MEASURExml}" "${UPGRADExml}"
+sed -i "s/RUNTESTruntime/${UPGRADEruntime}/g" $UPGRADExml
+sed -i "s/RUNTESTmaxOBJ/${UPGRADEmaxOBJ}/g" $UPGRADExml
+echo "> created COSbench workload file: ${UPGRADExml}"
+
+# Lastly insert runtime and numOBJ for MEASURE workload
+sed -i "s/RUNTESTruntime/${MEASUREruntime}/g" $MEASURExml
+sed -i "s/RUNTESTmaxOBJ/${MEASUREmaxOBJ}/g" $MEASURExml
+
+
+# Complete
 echo "DONE - Validate XML files before proceeding."
 echo -e "REMEMBER to insert passwd into XML files by running either:\n    resetRGW.sh -or- copyPasswd.sh"
 
 # DONE
+
