@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="fillCluster" description="RGW testing">
+
+<!-- Initialization -->
+  <storage type="FILLstorage_type" config="timeout=FILLtimeout" retry="FILLretry"/>
+  <auth type="FILLauth_type" config="FILLconfig" />
+
+  <workflow>
+
+<!-- Initialization -->
+    <workstage name="init_containers">
+        <work type="init" workers="1" config="containers=r(1,FILLnumCont)"/>
+    </workstage>
+
+<!-- Prepare using container counts, object counts and object sizes from vars.shinc -->
+    <workstage name="preparing_cluster">
+        <work type="prepare" workers="FILLworkers" config="containers=r(1,FILLnumCont);objects=r(1,FILLnumObj);sizes=FILLsizes"/>
+    </workstage>
+
+  </workflow>
+
+</workload>
