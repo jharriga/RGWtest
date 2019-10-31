@@ -9,22 +9,19 @@ RGWhostname="pcloud08"
 pollinterval="1m"              # poll.sh interval to gather statistics
 
 #----------------------------------------------------------------------
-# Runtimes for various COSbench workstages
+# Runtimes for various COSbench workloads
 # WARNING: if you change these you need to re-run 'writeXML.sh'
-# KEY RUNTIME VALUES - used below in FILLvalues_arr and RTvalues_arr
+# RUNTIME VALUES - used below in FILLvalues_arr and MEASUREvalues_arr
 #
-# NOTE: runtime_sec is ignored for fillWorkload.xml jobs
-runtime_sec="3600"                 # 1hr Runtime (in sec)  
-#runtime_sec="21600"               # 6hr Runtime (in sec)  
-#runtime_sec="86400"               # 24hr Runtime (in sec)  
-#runtime_sec="172800"              # 48hr Runtime (in sec)  
+# NOTE: runtime is ignored for FILLxml workload
+MEASUREruntime="3600"             # 1hr Runtime (in sec)  
+AGEruntime="172800"               # 48hr Runtime (in sec)  
+UPGRADEruntime="36000"            # 10hr Runtime (in sec)  
 rgwUSER="johndoe:swift"           # username
 #rgwURL="172.16.0.131:5000"       # auth_url connection point
 rgwURL="localhost:5000"		      # each client will run its own haproxy
-#fillWORKERS=80         # number of workers to use for filling the Cluster (w/10 Clients)
-#runtestWORKERS=80      # number of workers for running IOWorkload (w/10 Clients)
 fillWORKERS=40        # LTA number of workers to use for filling the Cluster (ie. 5 Clients)
-runtestWORKERS=40     # LTA number of workers for running IOWorkload (ie. 5 Clients)
+measureWORKERS=40     # LTA number of workers for running IOWorkload (ie. 5 Clients)
 
 #
 # Object sizes
@@ -33,28 +30,15 @@ runtestWORKERS=40     # LTA number of workers for running IOWorkload (ie. 5 Clie
 objSIZES="h(1|1|50,64|64|15,8192|8192|15,65536|65536|15,1048576|1048576|5)KB"
 
 # Determine cluster fill capacity
-# Number of Containers and Objects
+# Number of Containers and Objects, by workload type
 numCONT=5
-#numOBJ=22000              # e.g. for 25% fill
-#numOBJ=43397              # e.g. for 50% fill
 numOBJ=232000              # for 30% fill in LTA w/24 HDDs (7x OSD nodes)
-# highest object range for WRITE and DELETE operations
-#numOBJmax=$(( (numOBJ * 2) ))  # multiply by two for AGING runs
-numOBJmax=$numOBJ                # for HYBRID steady-state Object Count
+MEASUREmaxOBJ=$numOBJ
+UPGRADEmaxOBJ=$numOBJ
+AGEmaxOBJ=$(( (numOBJ * 2) ))  # multiply by two for AGING runs
 
 #########
-# DELWRITE workload specific variables
-# Container ranges for the Write and Delete operation statements
-wrCONT="u(1,2)"
-delCONT="u(1,2)"
-# Object ranges for the Write and Delete operation statements
-# TO ENSURE that we are legitimately writing new objects, we are
-#      using a higher objcnt for these than read/list operations
-wrOBJ="u(1,${numOBJmax})"
-delOBJ="u(1,${numOBJmax})"
-
-#########
-# HYBRID Workload specific variables
+# MEASURE Workload specific variables
 # Ratios for operation types - MUST add up to 100%
 rdRatio=60
 wrRatio=16
@@ -64,6 +48,10 @@ totalRatio=$(( (rdRatio + wrRatio + delRatio + listRatio) ))
 if [ $totalRatio -ne 100 ]; then
     echo "var.shinc: Operation ratios (rdRatio, wrRatio, ...) must equal 100%"; exit
 fi
+# Conf portions for the Delete and Write operation statements
+#   - reserve the first 2 containers for Write and Delete ops
+wrCONF="containers=u(1,2);objects=u(1,RUNTESTmaxOBJ)"
+delCONF="${wrCONF}"
 # Conf portions for the Read and List operation statements
 #   - start at 3 to reserve the first 2 containers for Write and Delete ops
 # NOTE: COSbench will FAIL if job attempts to READ a non-existing Object
@@ -75,11 +63,10 @@ listCONF="${rdCONF}"
 # Names of COSbench workload files and values to insert into template files
 #
 # First up - fill/empty workloads
-# These workloads are initiated by the fillCluster.sh/emptyCluster.sh scripts
-FILLtemplate="XMLtemplates/TMPL_fillCluster.xml"
-FILLxml="fillWorkload.xml"
-EMPTYtemplate="XMLtemplates/TMPL_emptyCluster.xml"
-EMPTYxml="emptyWorkload.xml"
+FILLtemplate="XMLtemplates/TMPL_fill.xml"
+FILLxml="fill.xml"
+EMPTYtemplate="XMLtemplates/TMPL_empty.xml"
+EMPTYxml="empty.xml"
 # fillCluster: pre-existing keys in the template file
 # also used to populate EMPTYxml
 declare -a FILLkeys_arr=("FILLstorage_type"
@@ -105,19 +92,16 @@ declare -a FILLvalues_arr=("swift"               # storage type
                          )
 
 #
-# Next up - RUNTEST settings
-# This COSbench workload is initiated by the runIOworkload.sh script
-RUNTESTtemplate="XMLtemplates/TMPL_hybrid.xml"
-#RUNTESTtemplate="XMLtemplates/TMPL_deleteWrite.xml"
-RUNTESTxml="ioWorkload.xml"
-# runtest: pre-existing keys in the RUNTESTtemplate file
-declare -a RTkeys_arr=("RUNTESTstorage_type"
+# Next up - MEASURE workload settings
+MEASUREtemplate="XMLtemplates/TMPL_measure.xml"
+MEASURExml="measure.xml"
+# measure: pre-existing keys in the MEASUREtemplate file
+declare -a MEASUREkeys_arr=("RUNTESTstorage_type"
                        "RUNTESTtimeout"
                        "RUNTESTretry"
                        "RUNTESTauth_type"
                        "RUNTESTconfig"
                        "RUNTESTworkers"
-                       "RUNTESTruntime"
                        "RUNTESTsizes"
                        "RUNTESTnumCont"
                        "RUNTESTnumObj"
@@ -127,19 +111,16 @@ declare -a RTkeys_arr=("RUNTESTstorage_type"
                        "RUNTESTlistRatio"
                        "RUNTESTrdConf"
                        "RUNTESTlistConf"
-                       "RUNTESTwrCont"
-                       "RUNTESTdelCont"
-                       "RUNTESTwrObj"
-                       "RUNTESTdelObj"
+                       "RUNTESTwrConf"
+                       "RUNTESTdelConf"
                        )
-declare -a RTvalues_arr=("swift"               # storage_type
+declare -a MEASUREvalues_arr=("swift"               # storage_type
                          "900000"              # timeout (15m)
                          "3"                   # retries
                          "swauth"              # auth_type
                          # config: a bit messy since SED requires "/" be escaped
                          "username=${rgwUSER};password=EMPTY;auth_url=http:\/\/${rgwURL}\/auth\/1.0"
-                         "${runtestWORKERS}"   # workers
-                         "${runtime_sec}"      # runtime in seconds
+                         "${measureWORKERS}"   # workers
                          "${objSIZES}"         # Object sizes
                          "${numCONT}"          # number of Containers
                          "${numOBJ}"           # number of Objects
@@ -149,11 +130,12 @@ declare -a RTvalues_arr=("swift"               # storage_type
                          "${listRatio}"        # List ratio
                          "${rdCONF}"           # config for Read operations
                          "${listCONF}"         # config for List operations
-                         "${wrCONT}"           # container range for Write ops
-                         "${delCONT}"          # container range for Delete ops
-                         "${wrOBJ}"            # object range for Write ops
-                         "${delOBJ}"           # object range for Delete ops
+                         "${wrCONF}"           # config for Write ops
+                         "${delCONF}"          # config for Delete ops
                          )
+# Lastly - AGE and UPGRADE workloads
+AGExml="age.xml"
+UPGRADExml="upgrade.xml"
  
 #------------------------
 # resetRGW.sh variables
@@ -189,8 +171,7 @@ fi
 # runIOworkload.sh vars
 
 # COSbench vars
-#cosPATH="/root/0.4.2.c4"
-cosPATH="/root/v0.4.2"
+cosPATH="/root/0.4.2.c4"
 
 # Timestamp logfile
 ts="$(date +%Y%m%d-%H%M%S)"
@@ -235,6 +216,10 @@ if [ $ret2 -eq 0 ]; then
     fi
 fi
 #echo "runmode is $runmode"        # DEBUG
+
+# DEBUG DEBUG DEBUG
+#runmode="baremetal"
+
 if [ $runmode == "invalid" ]; then
     echo "vars.shinc: unable to determine runmode(bare-metal or containerized)"
     echo "Aborting..."
