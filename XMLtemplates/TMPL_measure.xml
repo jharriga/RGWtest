@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="hybridSS" description="RGW testing">
+
+
+<!-- Initialization -->
+  <storage type="RUNTESTstorage_type" config="timeout=RUNTESTtimeout" retry="RUNTESTretry"/>
+  <auth type="RUNTESTauth_type" config="RUNTESTconfig" />
+
+  <workflow>
+
+<!-- Use operation mix & object sizes as defined in vars.shinc	 -->
+
+    <workstage name="MAIN">
+        <work name="hybrid" workers="RUNTESTworkers" runtime="RUNTESTruntime" >
+            <operation name="writeOP" type="write" ratio="RUNTESTwrRatio" config="RUNTESTwrConf" />
+            <operation name="deleteOP" type="delete" ratio="RUNTESTdelRatio" config="RUNTESTdelConf" />
+	    <operation name="readOP" type="read" ratio="RUNTESTrdRatio" config="RUNTESTrdConf" />
+            <operation name="listOP" type="list" ratio="RUNTESTlistRatio" config="RUNTESTlistConf" />
+        </work>
+    </workstage>
+
+  </workflow>
+
+</workload>
