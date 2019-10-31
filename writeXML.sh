@@ -1,6 +1,6 @@
 #!/bin/bash
 # writeXML.sh - creates the COSbench workload files
-#   fillWorkload.xml, emptyWorkload.xml, ioWorkload.xml
+#   fill.xml, measure.xml, age.xml, upgrade.xml
 
 # Bring in other script files
 myPath="${BASH_SOURCE%/*}"
