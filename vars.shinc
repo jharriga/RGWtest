@@ -50,7 +50,7 @@ if [ $totalRatio -ne 100 ]; then
 fi
 # Conf portions for the Delete and Write operation statements
 #   - reserve the first 2 containers for Write and Delete ops
-wrCONF="containers=u(1,2);objects=u(1,RUNTESTmaxOBJ)"
+wrCONF="containers=u(1,2);objects=u(1,RUNTESTmaxOBJ);sizes=${objSIZES}"
 delCONF="${wrCONF}"
 # Conf portions for the Read and List operation statements
 #   - start at 3 to reserve the first 2 containers for Write and Delete ops
