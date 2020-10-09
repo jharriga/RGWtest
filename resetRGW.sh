@@ -72,8 +72,10 @@ if [ $runmode == "containerized" ]; then
     echo -e $nt_start
 fi
 
-echo "Stopping RGWs"
-ansible -m shell -a 'systemctl stop ceph-radosgw@rgw.`hostname -s`.service' rgws
+echo "Stopping RGWs, and echoing status"
+ansible -m shell -a 'systemctl stop ceph-radosgw.target' rgws
+sleep 5
+ansible -o -m shell -a 'systemctl status ceph-radosgw.target |grep Act' rgws
 
 # ensure that pool deletion is enabled
 $execMON ceph tell mon.\* injectargs '--mon-allow-pool-delete=true'
@@ -88,8 +90,10 @@ create_pools $REPLICATION
 # echo "sleeping for $longPAUSE seconds..."; sleep "${longPAUSE}"
 echo "sleeping for 30 seconds..."; sleep 30
 
-echo "Starting RGWs"
-ansible -m shell -a 'systemctl start ceph-radosgw@rgw.`hostname -s`.service' rgws
+echo "Starting RGWs, and echoing status"
+ansible -m shell -a 'systemctl start ceph-radosgw.target' rgws
+sleep 5
+ansible -o -m shell -a 'systemctl status ceph-radosgw.target |grep Act' rgws
 
 echo "Creating User - which generates a new Password"
 $execRGW 'radosgw-admin user create --uid=johndoe --display-name="John Doe" --email=john@example.com' &&
