@@ -140,10 +140,10 @@ UPGRADExml="upgrade.xml"
 #------------------------
 # resetRGW.sh variables
 longPAUSE="400s"
-pool_list=("default.rgw.users.keys" "default.rgw.data.root" ".rgw.root" "default.rgw.control" \
-          "default.rgw.gc" "default.rgw.buckets.data" "default.rgw.buckets.index" "default.rgw.buckets.extra" \
-          "default.rgw.log" "default.rgw.meta" "default.rgw.intent-log" "default.rgw.usage" "default.rgw.users" \
-          "default.rgw.users.email" "default.rgw.users.swift" "default.rgw.users.uid")
+pool_list=(".rgw.root" "default.rgw.control" \
+          "default.rgw.buckets.data" "default.rgw.buckets.index" \
+          "default.rgw.log" "default.rgw.meta")
+       
 numREPLICAS=3                          # how many replicas
 #preparePTYPE=rep                       # Must be rep (replicated) OR ec (erasure coded)
 preparePTYPE=ec                       # Must be rep (replicated) OR ec (erasure coded)
