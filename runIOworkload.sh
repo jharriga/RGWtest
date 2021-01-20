@@ -25,6 +25,9 @@ if [ ! -f "${jobfile}" ]; then
     error_exit "$LINENO: Unable to open jobfile: $jobfile."
 fi
 
+# Check for COSbench controller
+checkCB
+
 # Create log file - named in vars.shinc
 if [ ! -d $RESULTSDIR ]; then
   mkdir -p $RESULTSDIR || \
