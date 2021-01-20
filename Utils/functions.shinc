@@ -1,5 +1,22 @@
 #--------------------------------------
 # FUNCTIONS
+function checkCB {
+# check that COSbench controller is running
+
+    if ! pgrep -a -f "cosbench.*controller" >/dev/null 2>&1; then
+      echo "COSbench controller PID wasn't found."
+      echo "COSbench is mis-configured. Exiting."
+      exit 1
+    fi
+
+# COSbench 'archive' dir should exist
+    if [ ! -d "${cosPATH}/archive" ]; then
+      echo "Directory ${cosPATH}/archive DOES NOT exist."
+      echo "COSbench is mis-configured. Exiting."
+      exit 1
+    fi
+}
+
 function updatelog {
 # Echoes passed string to LOGFILE and stdout
     logfn=$2
